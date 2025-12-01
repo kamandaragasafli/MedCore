@@ -1,0 +1,896 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAdmin - Profesyonel Admin Paneli</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            {% if company.logo %}
+            <div class="brand-logo">
+                <img src="{{ company.logo.url }}" alt="{{ company.name }}">
+            </div>
+            {% else %}
+            <div class="brand-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            {% endif %}
+            <div>
+                <div class="brand-title">{{ company.name }}</div>
+                <div class="brand-subtitle">Sağlamlıq İdarəetmə Paneli</div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-label">Menyu</div>
+            <a href="{% url 'core:dashboard' %}" class="menu-item {% block active_dashboard %}{% endblock %}">
+                <i class="fas fa-home"></i>
+                <span class="menu-text">İdarə Paneli</span>
+            </a>
+
+            <a href="{% url 'doctors:list' %}" class="menu-item {% block active_doctors %}{% endblock %}">
+                <i class="fas fa-user-md"></i>
+                <span class="menu-text">Həkimlər</span>
+                <!-- <span class="menu-badge"></span> -->
+            </a>
+            <a href="{% url 'doctors:add' %}" class="menu-item {% block active_add_doctor %}{% endblock %}">
+                <i class="fas fa-plus-circle"></i>
+                <span class="menu-text">Həkim Əlavə et</span>
+            </a>
+
+            <a href="{% url 'doctors:add_payment' %}" class="menu-item {% block active_add_payment %}{% endblock %}">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="menu-text">Ödəniş əlavə et</span>
+            </a>
+            <!-- <a href="" class="menu-item {% block active_payments %}{% endblock %}">
+                <i class="fas fa-receipt"></i>
+                <span class="menu-text">Ödənişlər</span>
+                <span class="menu-badge"></span> 
+            </a> -->
+
+            <a href="" class="menu-item {% block active_datasiya %}{% endblock %}">
+                <i class="fas fa-database"></i>
+                <span class="menu-text">Datasiya</span>
+            </a>
+
+            <a href="{% url 'drugs:list' %}" class="menu-item {% block active_drugs %}{% endblock %}">
+                <i class="fas fa-pills"></i>
+                <span class="menu-text">Dərmanlar</span>
+                <!-- <span class="menu-badge">89</span> -->
+            </a>
+            <a href="{% url 'prescriptions:add' %}" class="menu-item {% block active_add_registration %}{% endblock %}">
+                <i class="fas fa-truck-loading"></i>
+                <span class="menu-text">Qeydiyyat əlavə et</span>
+            </a>
+
+
+            <a href="{% url 'prescriptions:list' %}" class="menu-item {% block active_spellings %}{% endblock %}">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="menu-text">Aylıq Qeydiyyatlar</span>
+            </a>
+
+            <a href="{% url 'sales:list' %}" class="menu-item {% block active_sales %}{% endblock %}">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="menu-text">Satışlar</span>
+                <!-- <span class="menu-badge">342</span> -->
+            </a>
+            <a href="{% url 'sales:add' %}" class="menu-item {% block active_add_sale %}{% endblock %}">
+                <i class="fas fa-chart-line"></i>
+                <span class="menu-text">Satış Əlavə et</span>
+            </a>
+
+            <a href="{% url 'reports:list' %}" class="menu-item {% block active_reports %}{% endblock %}">
+                <i class="fas fa-file-invoice"></i>
+                <span class="menu-text">Aylıq Hesabat</span>
+            </a>
+            {% if subscription and subscription.plan %}
+                {% if subscription.plan.plan_type == 'professional' or subscription.plan.plan_type == 'enterprise' %}
+            <a href="{% url 'chatbot:chatbot' %}" class="menu-item {% block active_chatbot %}{% endblock %}">
+                <i class="fas fa-robot"></i>
+                <span class="menu-text">AI Chatbot</span>
+            </a>
+                {% endif %}
+            {% endif %}
+            
+            <a href="{% url 'core:notifications' %}" class="menu-item {% block active_notifications %}{% endblock %}">
+                <i class="fas fa-bell"></i>
+                <span class="menu-text">Bildirişlər</span>
+                {% if unread_notification_count > 0 %}
+                <span class="menu-badge">{{ unread_notification_count }}</span>
+                {% endif %}
+            </a>
+            <a href="" class="menu-item {% block active_old_report %}{% endblock %}">
+                <i class="fas fa-archive"></i>
+                <span class="menu-text">Köhnə Hesabat</span>
+            </a>
+            
+            <a href="" class="menu-item {% block active_profile %}{% endblock %}">
+                <i class="fas fa-user-circle"></i>
+                <span class="menu-text">Profil</span>
+            </a>
+
+            <a href="" class="menu-item {% block active_regions %}{% endblock %}">
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="menu-text">Bölgələr</span>
+            </a>
+            <a href="" class="menu-item {% block active_hospital %}{% endblock %}">
+                <i class="fas fa-clinic-medical"></i>
+                <span class="menu-text">Klinikalar</span>
+                <!-- <span class="menu-badge"></span> -->
+            </a>
+
+            <div class="menu-divider"></div>
+
+            <a href="{% url 'core:settings' %}" class="menu-item {% block active_settings %}{% endblock %}">
+                <i class="fas fa-cog"></i>
+                <span class="menu-text">Tənzimləmələr</span>
+            </a>
+        </div>
+        <!-- <div class="sidebar-cta">
+            <div class="cta-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="cta-title">Görüş</div>
+            <p class="cta-text">Yeni görüş təyin etmək istəyirsiniz?</p>
+            <button class="cta-button">Görüş Təyin Et</button>
+        </div> -->
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <div class="top-content">
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Hər hansı bir şey axtarın">
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-action-buttons">
+                    <button class="action-btn action-btn-primary" title="Yeni qeydiyyat əlavə et">
+                        <a href="{% url 'prescriptions:add' %}"><i class="fas fa-user-plus"></i>
+                        <span class="btn-text">Qeydiyyat Əlavə Edin</span>
+                    </a>
+                    </button>
+                    <button class="action-btn action-btn-success" title="Yeni satış əlavə et">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="btn-text">Satış Əlavə Edin</span>
+                    </button>
+                    <button class="action-btn action-btn-warning" title="Yeni ödəniş əlavə et">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="btn-text">Ödəniş Əlavə Edin</span>
+                    </button>
+                </div>
+                <a href="{% url 'core:notifications' %}" class="topbar-icon" title="Notifications" style="text-decoration: none; color: inherit; position: relative;">
+                    <i class="far fa-bell"></i>
+                    {% if unread_notification_count > 0 %}
+                    <span class="notification-badge" style="position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">{{ unread_notification_count }}</span>
+                    {% endif %}
+                </a>
+                <button class="topbar-icon" id="chatbot-toggle" title="Messages">
+                    <i class="far fa-comment-alt"></i>
+                    {% comment %} <span class="notification-badge">3</span> {% endcomment %}
+                </button>
+                <div class="user-menu-wrapper">
+                    <div class="user-menu" id="user-menu-toggle">
+                        <div class="user-avatar">{{ user.username|slice:":2" }}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{ user.username }}</div>
+                            {% if user.is_superuser %}
+                            <div class="user-role">Admin</div>
+                            {% else %}
+                            <div class="user-role">User</div>
+                            {% endif %}
+                            <div class="user-role">{{ user.role }}</div>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="dropdown-header">
+                            <div class="user-avatar large">{{ user.username|slice:":2" }}</div>
+                            <div>
+                                <div class="dropdown-user-name">{{ user.username }}</div>
+                                <div class="dropdown-user-email">{{ user.email }}</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'core:profile' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Mənim Profilim</span>
+                        </a>
+                        <a href="" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Tənzimləmələr</span>
+                        </a>
+                        <a href="" class="dropdown-item">
+                            <i class="fas fa-bell"></i>
+                            <span>Bildirişlər</span>
+                            <span class="item-badge">5</span>
+                        </a>
+                        <a href="" class="dropdown-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Kömək və Dəstək</span>
+                        </a>
+                        {% if user.is_superuser %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'master_admin:dashboard' %}" class="dropdown-item" style="background: linear-gradient(135deg, #fee2e2, #fef2f2); color: #dc2626; font-weight: 600;">
+                            <i class="fas fa-crown"></i>
+                            <span>Master Admin Panel</span>
+                        </a>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'core:logout' %}" class="dropdown-item danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Çıxış</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot Side Panel -->
+        <div class="chatbot-panel" id="chatbot-panel">
+            <div class="chatbot-header">
+                <div class="chatbot-header-left">
+                    <div class="chatbot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="chatbot-title">AI Tibbi Assistent</div>
+                        <div class="chatbot-status">
+                            <span class="status-dot"></span>
+                            Onlayn
+                        </div>
+                    </div>
+                </div>
+                <button class="chatbot-close" id="chatbot-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message-date">Bu gün, 14:35</div>
+                
+                <div class="chat-message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            Salam! Mən sizin AI Tibbi Assistentinizəm. Bu gün sizə necə kömək edə bilərəm? Mən aşağıdakılarda kömək edə bilərəm:
+                            <ul>
+                                <li>Görüş planlaşdırma</li>
+                                <li>Xəstə məlumatları</li>
+                                <li>Tibbi sorğular</li>
+                                <li>Hesabat yaradılması</li>
+                            </ul>
+                        </div>
+                        <div class="message-time">14:35</div>
+                    </div>
+                </div>
+                
+                <div class="chat-message user-message">
+                    <div class="message-content">
+                        <div class="message-text">
+                            Bugünkü görüşləri göstər
+                        </div>
+                        <div class="message-time">14:36</div>
+                    </div>
+                </div>
+                
+                <div class="chat-message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            Bugün üçün 12 görüş planlaşdırılıb. Növbəti görüş saat 10:00-da David Miller ilə Ümumi Müayinə üçündür.
+                        </div>
+                        <div class="message-time">14:36</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chatbot-quick-actions">
+                <button class="quick-action-btn">
+                    <i class="fas fa-calendar"></i>
+                    Bugünkü Cədvəl
+                </button>
+                <button class="quick-action-btn">
+                    <i class="fas fa-users"></i>
+                    Xəstə Siyahısı
+                </button>
+                <button class="quick-action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    Statistika
+                </button>
+            </div>
+            
+            <div class="chatbot-input-area">
+                <button class="attach-btn" title="Fayl Əlavə Et">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="text" id="chatbot-input" placeholder="Mesajınızı yazın..." class="chatbot-input">
+                <button class="send-btn" id="chatbot-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chatbot Overlay -->
+        <div class="chatbot-overlay" id="chatbot-overlay"></div>
+    
+
+        <!-- Django Messages -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+                <div class="alert-icon">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="alert-content">
+                    <strong>
+                        {% if message.tags == 'success' %}
+                            Uğurlu!
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                            Xəta!
+                        {% elif message.tags == 'warning' %}
+                            Diqqət!
+                        {% else %}
+                            Məlumat
+                        {% endif %}
+                    </strong>
+                    <p>{{ message }}</p>
+                </div>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/theme-manager.js' %}"></script>
+    
+    <script>
+
+// Theme Management System
+
+
+// Show notification
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'theme-notification';
+    notification.innerHTML = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2000);
+}
+
+// Load saved colors
+function loadSavedTheme() {
+    // Check if themes object exists (from theme-manager.js)
+    if (typeof themes === 'undefined' || typeof applyTheme === 'undefined') {
+        return; // Theme manager not loaded, skip
+    }
+    const savedTheme = localStorage.getItem('selectedTheme');
+    if (savedTheme && themes[savedTheme]) {
+        if (typeof currentTheme !== 'undefined') {
+            currentTheme = savedTheme;
+        }
+        applyTheme(themes[savedTheme]);
+    }
+}
+
+// Modal functions
+function openColorPicker() {
+    const modal = document.getElementById('colorPickerModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        initColorPicker();
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+    }
+}
+
+function closeColorPicker() {
+    const modal = document.getElementById('colorPickerModal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+}
+
+// Make functions globally accessible
+window.openColorPicker = openColorPicker;
+window.closeColorPicker = closeColorPicker;
+window.resetColors = resetColors;
+window.saveColors = saveColors;
+window.selectTheme = selectTheme;
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved theme
+    loadSavedTheme();
+    
+    // Close modal when clicking outside
+    const modal = document.getElementById('colorPickerModal');
+    if (modal) {
+        modal.onclick = function(e) {
+            if (e.target.id === 'colorPickerModal') {
+                closeColorPicker();
+            }
+        };
+    }
+});
+
+        // Toggle sidebar on mobile
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.querySelector('.toggle-sidebar');
+
+        if (toggleBtn && sidebar && sidebarOverlay) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                if (sidebar.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Close sidebar when clicking overlay
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 992 && 
+                !sidebar.contains(event.target) && 
+                !toggleBtn.contains(event.target) && 
+                sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Menu item active state
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                menuItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Close sidebar on mobile when menu item is clicked
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // ==================== CHATBOT FUNCTIONALITY ====================
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotPanel = document.getElementById('chatbot-panel');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotOverlay = document.getElementById('chatbot-overlay');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        // Open chatbot
+        chatbotToggle.addEventListener('click', function() {
+            chatbotPanel.classList.add('active');
+            chatbotOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            chatbotInput.focus();
+        });
+
+        // Close chatbot
+        function closeChatbot() {
+            chatbotPanel.classList.remove('active');
+            chatbotOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        chatbotClose.addEventListener('click', closeChatbot);
+        chatbotOverlay.addEventListener('click', closeChatbot);
+
+        // Send message function
+        function sendMessage() {
+            const message = chatbotInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            const userMessageHTML = `
+                <div class="chat-message user-message">
+                    <div class="message-content">
+                        <div class="message-text">${message}</div>
+                        <div class="message-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                </div>
+            `;
+            chatbotMessages.insertAdjacentHTML('beforeend', userMessageHTML);
+            chatbotInput.value = '';
+
+            // Scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+            // Simulate bot response after 1 second
+            setTimeout(() => {
+                const botResponses = [
+                    "I'm processing your request. Please wait a moment...",
+                    "Let me check that information for you.",
+                    "I found the information you requested. Would you like me to elaborate?",
+                    "That's a great question! Here's what I can tell you...",
+                    "Based on the current data, I can help you with that."
+                ];
+                const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+
+                const botMessageHTML = `
+                    <div class="chat-message bot-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">${randomResponse}</div>
+                            <div class="message-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                    </div>
+                `;
+                chatbotMessages.insertAdjacentHTML('beforeend', botMessageHTML);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }, 1000);
+        }
+
+        // Send message on button click
+        chatbotSend.addEventListener('click', sendMessage);
+
+        // Send message on Enter key
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Quick action buttons (only if they exist)
+        const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+        if (quickActionBtns.length > 0) {
+            quickActionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const chatbotInput = document.getElementById('chatbot-input');
+                    if (chatbotInput) {
+                        const action = this.textContent.trim();
+                        chatbotInput.value = action;
+                        if (typeof sendMessage === 'function') {
+                            sendMessage();
+                        }
+                    }
+                });
+            });
+        }
+
+        // ==================== USER DROPDOWN MENU ====================
+        const userMenuToggle = document.getElementById('user-menu-toggle');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        if (userMenuToggle && userDropdown) {
+            userMenuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!userDropdown.contains(e.target) && !userMenuToggle.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            userDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Count Buttons Animation and Interaction
+        const countButtons = document.querySelectorAll('.count-btn');
+        
+        // Add click animations (only if buttons exist)
+        if (countButtons.length > 0) {
+            countButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+        }
+
+        // Animate count numbers on page load
+        function animateCountButton(element, targetNumber) {
+            const badge = element.querySelector('.count-badge');
+            const cleanNumber = parseInt(targetNumber.replace(/,/g, ''));
+            const duration = 1000;
+            const steps = 30;
+            const increment = cleanNumber / steps;
+            let current = 0;
+            let step = 0;
+
+            const timer = setInterval(() => {
+                step++;
+                current += increment;
+                
+                if (step >= steps) {
+                    current = cleanNumber;
+                    clearInterval(timer);
+                }
+                
+                badge.textContent = Math.floor(current).toLocaleString('en-US');
+            }, duration / steps);
+        }
+
+        // Start animations when page loads
+        window.addEventListener('load', function() {
+            countButtons.forEach((btn, index) => {
+                setTimeout(() => {
+                    const targetNumber = btn.querySelector('.count-badge').textContent;
+                    animateCountButton(btn, targetNumber);
+                }, index * 100);
+            });
+        });
+
+        // Simulate real-time updates (every 10 seconds)
+        setInterval(function() {
+            const randomBtn = countButtons[Math.floor(Math.random() * countButtons.length)];
+            const badge = randomBtn.querySelector('.count-badge');
+            const currentValue = parseInt(badge.textContent.replace(/,/g, ''));
+            const change = Math.floor(Math.random() * 10) - 3; // Random change between -3 and +6
+            const newValue = Math.max(0, currentValue + change);
+            
+            // Add pulse animation
+            randomBtn.style.animation = 'pulse 0.5s ease-in-out';
+            setTimeout(() => {
+                randomBtn.style.animation = '';
+            }, 500);
+            
+            badge.textContent = newValue.toLocaleString('en-US');
+        }, 10000);
+    </script>
+    
+    <style>
+        /* Django Messages Styles */
+        .messages-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.3s ease-out;
+            position: relative;
+            border-left: 4px solid;
+        }
+
+        .alert-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-content strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .alert-content p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.5;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        /* Success */
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+
+        .alert-success .alert-icon {
+            color: #10b981;
+        }
+
+        /* Error/Danger */
+        .alert-error,
+        .alert-danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .alert-error .alert-icon,
+        .alert-danger .alert-icon {
+            color: #ef4444;
+        }
+
+        /* Warning */
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .alert-warning .alert-icon {
+            color: #f59e0b;
+        }
+
+        /* Info */
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: #3b82f6;
+            color: #1e3a8a;
+        }
+
+        .alert-info .alert-icon {
+            color: #3b82f6;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Auto-hide animation */
+        .alert-dismissing {
+            animation: slideOutRight 0.3s ease-out forwards;
+        }
+
+        @keyframes slideOutRight {
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .messages-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+
+            .alert {
+                padding: 12px 16px;
+            }
+
+            .alert-icon {
+                font-size: 20px;
+            }
+
+            .alert-content strong {
+                font-size: 14px;
+            }
+
+            .alert-content p {
+                font-size: 13px;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+    
+    <script>
+    // Auto-dismiss messages after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert && alert.parentNode) {
+                        alert.classList.add('alert-dismissing');
+                        setTimeout(() => {
+                            if (alert && alert.parentNode) {
+                                alert.remove();
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            });
+        }
+    });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProAdmin - Profesyonel Admin Paneli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <i class="fas fa-hospital"></i>
+            <span class="logo-text">MedAdmin</span>
+        </div>
+    </div>
+    <div class="sidebar-menu">
+        <a href="#" class="menu-item active">
+            <i class="fas fa-home"></i>
+            <span class="menu-text">Dashboard</span>
+        </a>
+        
+        
+        <a href="doctors.html" class="menu-item">
+            <i class="fas fa-user-md"></i>
+            <span class="menu-text">Həkimlər</span>
+            <span class="menu-badge">24</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-plus-circle"></i>
+            <span class="menu-text">Həkim Əlavə et</span>
+        </a>
+        
+
+        <a href="#" class="menu-item">
+            <i class="fas fa-money-bill-wave"></i>
+            <span class="menu-text">Ödəniş əlavə et</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-receipt"></i>
+            <span class="menu-text">Ödənişlər</span>
+            <span class="menu-badge">156</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-database"></i>
+            <span class="menu-text">Datasiya</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-file-contract"></i>
+            <span class="menu-text">Razılaşma</span>
+        </a>
+        
+       
+        <a href="#" class="menu-item">
+            <i class="fas fa-pills"></i>
+            <span class="menu-text">Dərmanlar</span>
+            <span class="menu-badge">89</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-truck-loading"></i>
+            <span class="menu-text">Qeydiyyat əlavə et</span>
+        </a>
+        
+       
+        <a href="#" class="menu-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="menu-text">Aylıq Qeydiyyatlar</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="menu-text">Satışlar</span>
+            <span class="menu-badge">342</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            <span class="menu-text">Aylıq Satışlar</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-file-invoice"></i>
+            <span class="menu-text">Aylıq Hesabat</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-archive"></i>
+            <span class="menu-text">Köhnə Hesabat</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="menu-text">Bölgələr</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-clinic-medical"></i>
+            <span class="menu-text">Klinikalar</span>
+            <span class="menu-badge">12</span>
+        </a>
+    </div>
+</div>
+
+      <!-- Main Content -->
+        <div class="datasiya-main">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Datasiya</h1>
+            </div>
+
+            <!-- Desktop Header -->
+            <div class="page-header">
+                <h1 class="page-title">Datasiya</h1>
+                <a href="#" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Geri
+                </a>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Bölgə</label>
+                        <select class="filter-select">
+                            <option value="">Hamısı</option>
+                            <option value="baki">Bakı</option>
+                            <option value="gence">Gəncə</option>
+                            <option value="sumqayit">Sumqayıt</option>
+                            <option value="lenkeran">Lənkəran</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tarix</label>
+                        <input type="date" class="filter-input" style="width: 150px;" value="2024-01-15">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Həkimlər</h3>
+                </div>
+
+                <table class="datasiya-table">
+                    <thead>
+                        <tr>
+                            <th>Həkim</th>
+                            <th style="text-align: right;">Borc Vəziyyəti</th>
+                            <th>Alınan Məbləğ</th>
+                            <th>Verilən Məbləğ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="hakim-name">Mehraliyeva Gunay</td>
+                            <td class="bore-vaziyyeti bore-positive">154.56</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Əsgarova Xanimzer</td>
+                            <td class="bore-vaziyyeti bore-negative">-4.69</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Aslanova Leyla</td>
+                            <td class="bore-vaziyyeti bore-positive">8.09</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Bünyadova Leman</td>
+                            <td class="bore-vaziyyeti bore-negative">-1.97</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Fermanova Ayrıura</td>
+                            <td class="bore-vaziyyeti bore-positive">95.71</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Fetullayev Cefer</td>
+                            <td class="bore-vaziyyeti bore-positive">142.24</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Huseynova Kamala</td>
+                            <td class="bore-vaziyyeti bore-negative">-23.96</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="hakim-name">Kasımova Nergiz</td>
+                            <td class="bore-vaziyyeti bore-positive">45.08</td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Alınan Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-input-group">
+                                    <span class="amount-label">Verilən Məbləğ:</span>
+                                    <input type="number" class="amount-input" >
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Summary Section -->
+                <div class="summary-section">
+                    <div class="summary-row">
+                        <span class="summary-label">Ümumi Alınan Məbləğ:</span>
+                        <span class="summary-value bore-positive" id="totalAlinan">0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Ümumi Verilən Məbləğ:</span>
+                        <span class="summary-value bore-negative" id="totalVerilen">0.00</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span class="total-label">Yekun Məbləğ:</span>
+                        <span class="total-value" id="yekunBalans">0.00</span>
+                    </div>
+                    <div class="form-actions">
+                    <button type="button" class="cancel-btn">Ləğv et</button>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i>
+                        Yadda Saxla
+                    </button>
+                </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Amount input calculations
+        const amountInputs = document.querySelectorAll('.amount-input');
+        
+        amountInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                calculateTotals();
+            });
+        });
+
+        function calculateTotals() {
+            let totalAlinan = 0;
+            let totalVerilen = 0;
+            
+            const rows = document.querySelectorAll('.datasiya-table tbody tr');
+            
+            rows.forEach(row => {
+                const alinanInput = row.querySelector('td:nth-child(3) .amount-input');
+                const verilenInput = row.querySelector('td:nth-child(4) .amount-input');
+                
+                const alinanValue = parseFloat(alinanInput.value) || 0;
+                const verilenValue = parseFloat(verilenInput.value) || 0;
+                
+                totalAlinan += alinanValue;
+                totalVerilen += verilenValue;
+            });
+            
+            // Update summary
+            document.getElementById('totalAlinan').textContent = totalAlinan.toFixed(2);
+            document.getElementById('totalVerilen').textContent = totalVerilen.toFixed(2);
+            
+            const yekunBalans = totalAlinan - totalVerilen;
+            document.getElementById('yekunBalans').textContent = yekunBalans.toFixed(2);
+            
+            // Color for yekun balans
+            const yekunElement = document.getElementById('yekunBalans');
+            yekunElement.className = 'total-value';
+            if (yekunBalans > 0) {
+                yekunElement.classList.add('bore-positive');
+            } else if (yekunBalans < 0) {
+                yekunElement.classList.add('bore-negative');
+            }
+        }
+
+        // Initialize totals
+        calculateTotals();
+    </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block active_sales %}active{% endblock %}
+
+{% block content %}
+
+        <!-- Main Content -->
+        <div class="ayliq-main">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Aylıq Qeydiyyat</h1>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    <span>Export</span>
+                </button>
+            </div>
+
+            <!-- Desktop Header -->
+            <div class="page-header">
+                <h1 class="page-title">Aylıq Qeydiyyat</h1>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    Excel Export
+                </button>
+            </div>
+
+            <!-- Filter Section -->
+            <form method="get" class="filter-section">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Bölgə</label>
+                        <select class="filter-select" name="region">
+                            <option value="" {% if not filters.region %}selected{% endif %}>Bölgə seçin</option>
+                            {% for region in regions %}
+                                <option value="{{ region.id }}" {% if filters.region == region.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ region.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Ay</label>
+                        <select class="filter-select" name="month">
+                            <option value="" {% if not filters.month %}selected{% endif %}>Ay seçin</option>
+                            {% for month_value, month_label in months %}
+                                <option value="{{ month_value }}" {% if filters.month == month_value|stringformat:"s" %}selected{% endif %}>
+                                    {{ month_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <a href="{% url 'sales:list' %}" class="filter-btn reset-btn">
+                        <i class="fas fa-undo"></i>
+                        Təmizlə
+                    </a>
+                    <button type="submit" class="filter-btn apply-btn">
+                        <i class="fas fa-search"></i>
+                        Axtar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Aylıq Qeydiyyat Məlumatları</h3>
+                    <div class="table-info">{{ table_info }}</div>
+                </div>
+
+                <div class="rotated-table-container">
+                    <table class="rotated-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Bölgə</th>
+                    
+                                {% for drug in drugs %}
+                                    <th class="drug-header">{{ drug.ad }}</th>
+                                {% endfor %}
+                    
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                    
+                        <tbody>
+                            {% for row in data %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ row.region.name }}</td>
+                    
+                                    {% for drug in drugs %}
+                                        <td>{{ row.drugs|get_item:drug.ad|default:"0" }}</td>
+                                    {% endfor %}
+                    
+                                    <td class="total-amount">{{ row.total }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="{{ drugs|length|add:'3' }}" style="padding:40px;color:#94a3b8;">
+                                        Filtrə uyğun nəticə tapılmadı.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                </div>
+
+                <div class="table-footer">
+                    <div class="summary-info">
+                        <div class="summary-item">
+                            <div class="summary-value">{{ summary_total }}</div>
+                            <div class="summary-label">Ümumi Satış</div>
+                        </div>
+                    </div>
+                    <div class="pagination">
+                        <button class="page-btn" disabled>Əvvəl</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn" disabled>Sonra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="main.js"></script>
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        document.querySelectorAll('.export-btn').forEach(btn => {
+            btn.addEventListener('click', function(event) {
+                event.preventDefault();
+                alert('Excel faylı yüklənəcək!');
+            });
+        });
+    </script>
+
+
+
+{% endblock content %}
+

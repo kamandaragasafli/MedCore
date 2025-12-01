@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}MedAdmin - Həkim Əlavə Et{% endblock %}
+
+{% block active_add_doctor %}active{% endblock %}
+
+{% block content %}
+    <div class="doctor-content">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="page-title">Həkim Əlavə Et</h1>
+        </div>
+
+        <!-- Desktop Header -->
+        <div class="page-header">
+            <h1 class="page-title">Həkim Əlavə Et</h1>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <!-- Şəxsi Məlumatlar -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user"></i>
+                    Şəxsi Məlumatlar
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required">Ad</label>
+                        <input type="text" class="form-input" placeholder="Həkimin adı">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bölgə</label>
+                        <input type="text" class="form-input" placeholder="Bölgə">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Peşəkar Məlumatlar -->
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required">İxtisas</label>
+                        <select class="form-select">
+                            <option value="">Seçin</option>
+                            <option value="kardiolog">Kardioloq</option>
+                            <option value="nevroloq">Nevroloq</option>
+                            <option value="terapevt">Terapevt</option>
+                            <option value="pediatr">Pediatr</option>
+                            <option value="cerrah">Cərrah</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Dərəcə</label>
+                        <select class="form-select">
+                            <option value="">Seçin</option>
+                            <option value="phd">PhD</option>
+                            <option value="md">MD</option>
+                            <option value="ms">MS</option>
+                            <option value="bs">BS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Kategoriya</label>
+                        <select class="form-select">
+                            <option value="">Seçin</option>
+                            <option value="1">1-ci kategoriya</option>
+                            <option value="2">2-ci kategoriya</option>
+                            <option value="3">3-cü kategoriya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Klinika</label>
+                        <select class="form-select">
+                            <option value="">Seçin</option>
+                            <option value="merkezi">Mərkəzi Klinika</option>
+                            <option value="seher">Şəhər Xəstəxanası</option>
+                            <option value="usaq">Uşaq Xəstəxanası</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Əlaqə Məlumatları -->
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Şəhər</label>
+                        <input type="text" class="form-input" placeholder="Şəhər">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Telefon</label>
+                        <input type="tel" class="form-input" placeholder="+994 XX XXX XX XX">
+                    </div>
+                </div>
+            </div>
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="cancel-btn">Ləğv et</button>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i>
+                    Həkim Əlavə Et
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form submission
+    document.querySelector('.submit-btn').addEventListener('click', function() {
+        alert('Həkim uğurla əlavə edildi!');
+    });
+
+    document.querySelector('.cancel-btn').addEventListener('click', function() {
+        if (confirm('Formu təmizləmək istədiyinizə əminsiniz?')) {
+            document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(element => {
+                element.value = '';
+            });
+        }
+    });
+</script>
+{% endblock %}

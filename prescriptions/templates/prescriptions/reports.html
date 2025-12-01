@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Aylıq Hesabat{% endblock %}
+{% block active_reports %}active{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+<style>
+    .reports-page {
+    padding: 24px;
+}
+
+/* HEADER */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* FILTER CARD */
+.filter-card {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.filter-select,
+.filter-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--dark-lighter);
+    color: var(--text);
+}
+
+.filter-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.reset-btn {
+    background: var(--dark-lighter);
+}
+
+.apply-btn {
+    background: var(--primary);
+    color: var(--text);
+}
+
+/* TABLE */
+.table-card {
+    background: var(--surface);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.rotated-table-container {
+    overflow-x: auto;
+}
+
+.rotated-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+}
+
+.rotated-table th {
+    background: var(--dark-lighter);
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid var(--border);
+}
+
+.rotated-table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.rotated .rotate-wrapper {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-weight: 700;
+}
+
+/* SUMMARY BAR */
+.summary-bar {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.summary-item {
+    background: var(--surface-muted);
+    padding: 16px 20px;
+    border-radius: 10px;
+}
+
+.summary-item .value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.summary-item .label {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+</style>
+<div class="reports-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">Aylıq Həkim Hesabatı</h1>
+        <div class="export-buttons" style="display: flex; gap: 10px;">
+            <form method="get" action="{% url 'reports:close' %}" style="margin-left:auto;">
+                <input type="hidden" name="month" value="{{ filters.month }}">
+                <input type="hidden" name="year" value="{{ filters.year }}">
+                <button type="submit" class="filter-btn apply-btn" style="background:#b91c1c;">
+                    Hesabatı Bağla
+                </button>
+            </form>
+            <a href="{% url 'reports:export_excel' %}?{{ request.GET.urlencode }}" class="export-btn" style="text-decoration: none; color: white;">
+                <i class="fas fa-file-excel"></i> Excel Export
+            </a>
+    
+        </div>
+       
+    </div>
+
+    <!-- FILTER FORM -->
+    <form method="get" class="filter-card">
+        <div class="filter-grid">
+
+            <!-- Region -->
+            <div class="filter-group">
+                <label>Bölgə</label>
+                <select name="region" class="filter-select">
+                    <option value="">Hamısı</option>
+                    {% for region in regions %}
+                        <option value="{{ region.id }}" {% if filters.region == region.id|stringformat:'s' %}selected{% endif %}>
+                            {{ region.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Month -->
+            <div class="filter-group">
+                <label>Ay</label>
+                <select name="month" class="filter-select">
+                    {% for value, label in months %}
+                        <option value="{{ value }}" {% if filters.month == value|stringformat:'s' %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Year -->
+            <div class="filter-group">
+                <label>İl</label>
+                <select name="year" class="filter-select">
+                    {% for year in years %}
+                        <option value="{{ year }}" {% if filters.year == year|stringformat:'s' %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Doctor -->
+            <div class="filter-group">
+                <label>Həkim</label>
+                <input type="text" name="doctor" class="filter-input" placeholder="Ad və ya kod"
+                       value="{{ filters.doctor }}">
+            </div>
+
+        </div>
+
+        <div class="filter-actions">
+            <a href="{% url 'reports:list' %}" class="btn reset-btn">Təmizlə</a>
+            <button class="btn apply-btn"><i class="fas fa-search"></i> Axtar</button>
+        </div>
+    </form>
+
+    <!-- TABLE WRAPPER -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Hesabat</h3>
+            <div class="table-info">{{ table_info }}</div>
+        </div>
+
+        <div class="rotated-table-container">
+            <table class="rotated-table">
+
+                <!-- TABLE HEAD -->
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Bölgə</th>
+                    <th>Kod</th>
+                    <th>Həkim</th>
+                    <th>İxtisas</th>
+                    <th>Kateqoriya</th>
+                    <th>Dərəcə</th>
+                    <th>Əvvəlki Borc</th>
+
+                    {% for drug in drugs %}
+                        <th class="rotated">
+                            <div class="rotate-wrapper">{{ drug.ad }}</div>
+                        </th>
+                    {% endfor %}
+
+                    <th>Total</th>
+                    <th>Hesablanan</th>
+                    <th>Silinen</th>
+                    <th>Avans</th>
+                    <th>Investisiya</th>
+                    <th>Geri Qaytarma</th>
+                    <th>Datasiya</th>
+                    <th>Yekun</th>
+                </tr>
+                </thead>
+
+                <!-- TABLE BODY -->
+                <tbody>
+                {% for row in doctor_rows %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+
+                       
+                        <td class="doctor-cell">
+                            {{ row.doctor.region.name }}
+                        </td>
+
+                        <td><code>{{ row.doctor.code }}</code></td>
+                        <td class="doctor-cell">
+                            {{ row.doctor.ad }}
+                        </td>
+                        <td>{{ row.doctor.ixtisas.name|default:"-" }}</td>
+                        <td>{{ row.doctor.category }}</td>
+                        <td>{{ row.doctor.get_degree_display }}</td>
+
+                        <td class="amount">{{ row.evvelki_borc|floatformat:2 }}</td>
+
+                        {% for drug in drugs %}
+                            <td class="drug-count">
+                                {{ row.drugs|get_item:drug.ad|default:"0" }}
+                            </td>
+                        {% endfor %}
+
+                        <td class="amount">{{ row.total_quantity }}</td>
+                        <td class="amount">{{ row.hesablanan|floatformat:2 }}</td>
+                        <td class="amount">{{ row.silinen_miqdar|floatformat:2 }}</td>
+                        <td class="amount">{{ row.payments.avans|floatformat:2 }}</td>
+                        <td class="amount">{{ row.payments.investisiya|floatformat:2 }}</td>
+                        <td class="amount">{{ row.payments.geriqaytarma|floatformat:2 }}</td>
+                        <td class="amount">{{ row.datasiya|floatformat:2 }}</td>
+                        <td class="amount total-debt">{{ row.yekun_borc|floatformat:2 }}</td>
+                    </tr>
+
+                {% empty %}
+                    <tr>
+                        <td colspan="{{ drugs|length|add:'12' }}" class="empty-row">
+                            Seçilmiş filtrə uyğun nəticə tapılmadı.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-bar">
+            <div class="summary-item">
+                <span class="value">{{ stats.doctor_count }}</span>
+                <span class="label">Həkim</span>
+            </div>
+            <div class="summary-item">
+                <span class="value">{{ stats.total_prescriptions }}</span>
+                <span class="label">Dərman Qeydiyyatı</span>
+            </div>
+            <div class="summary-item">
+                <span class="value">{{ stats.total_debt|floatformat:2 }} ₼</span>
+                <span class="label">Ümumi Yekun Borc</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    document.getElementById('report-btn').addEventListener('click', function() {
+        alert('Hesabat bağlanır...');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+"""
+Context processors for subscription app
+"""
+from .models import Notification
+
+
+def notifications(request):
+    """Add unread notification count and subscription info to template context"""
+    unread_count = 0
+    subscription = None
+    plan_type = None
+    
+    if request.user.is_authenticated and hasattr(request, 'company') and request.company:
+        try:
+            unread_count = Notification.objects.filter(
+                company=request.company,
+                is_read=False
+            ).count()
+        except:
+            unread_count = 0
+        
+        # Get subscription info
+        try:
+            subscription = request.company.active_subscription
+            if subscription and subscription.plan:
+                plan_type = subscription.plan.plan_type
+        except:
+            pass
+    
+    return {
+        'unread_notification_count': unread_count,
+        'subscription': subscription,
+        'plan_type': plan_type,
+    }
+

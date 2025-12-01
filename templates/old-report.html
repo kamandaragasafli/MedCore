@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProAdmin - Profesyonel Admin Paneli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <i class="fas fa-hospital"></i>
+            <span class="logo-text">MedAdmin</span>
+        </div>
+    </div>
+    <div class="sidebar-menu">
+        <a href="#" class="menu-item active">
+            <i class="fas fa-home"></i>
+            <span class="menu-text">Dashboard</span>
+        </a>
+        
+        
+        <a href="doctors.html" class="menu-item">
+            <i class="fas fa-user-md"></i>
+            <span class="menu-text">Həkimlər</span>
+            <span class="menu-badge">24</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-plus-circle"></i>
+            <span class="menu-text">Həkim Əlavə et</span>
+        </a>
+        
+
+        <a href="#" class="menu-item">
+            <i class="fas fa-money-bill-wave"></i>
+            <span class="menu-text">Ödəniş əlavə et</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-receipt"></i>
+            <span class="menu-text">Ödənişlər</span>
+            <span class="menu-badge">156</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-database"></i>
+            <span class="menu-text">Datasiya</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-file-contract"></i>
+            <span class="menu-text">Razılaşma</span>
+        </a>
+        
+       
+        <a href="#" class="menu-item">
+            <i class="fas fa-pills"></i>
+            <span class="menu-text">Dərmanlar</span>
+            <span class="menu-badge">89</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-truck-loading"></i>
+            <span class="menu-text">Qeydiyyat əlavə et</span>
+        </a>
+        
+       
+        <a href="#" class="menu-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="menu-text">Aylıq Qeydiyyatlar</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="menu-text">Satışlar</span>
+            <span class="menu-badge">342</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            <span class="menu-text">Aylıq Satışlar</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-file-invoice"></i>
+            <span class="menu-text">Aylıq Hesabat</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-archive"></i>
+            <span class="menu-text">Köhnə Hesabat</span>
+        </a>
+        
+        
+        <a href="#" class="menu-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="menu-text">Bölgələr</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-clinic-medical"></i>
+            <span class="menu-text">Klinikalar</span>
+            <span class="menu-badge">12</span>
+        </a>
+    </div>
+</div>
+
+    <!-- Main Content -->
+    <div class="top-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <button class="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Ara...">
+            </div>
+            <div class="user-menu">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">AK</div>
+                    <div>
+                        <div>Admin Kullanıcı</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Yönetici</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+ <!-- Settings Button -->
+    <button class="settings-btn" onclick="openColorPicker()">
+        <i class="fas fa-palette"></i>
+    </button>
+
+    <!-- Color Picker Modal -->
+    <div id="colorPickerModal" class="color-picker-modal">
+        <div class="color-picker-content">
+            <h2>Rəng Təmalarını Dəyişdir</h2>
+            
+            <div id="colorOptions">
+                
+            </div>
+
+            <div class="theme-actions">
+                <button class="theme-btn reset-btn" onclick="resetColors()">Standart</button>
+                <button class="theme-btn close-btn" onclick="closeColorPicker()">Bağla</button>
+                <button class="theme-btn save-btn" onclick="saveColors()">Yadda Saxla</button>
+            </div>
+        </div>
+    </div>
+        <!-- Main Content -->
+        <div class="ayliq-main">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Aylıq Qeydiyyat</h1>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    <span>Export</span>
+                </button>
+            </div>
+
+            <!-- Desktop Header -->
+            <div class="page-header">
+                <h1 class="page-title">Aylıq Qeydiyyat</h1>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    Excel Export
+                </button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Bölgə</label>
+                        <select class="filter-select">
+                            <option value="">Hamısı</option>
+                            <option value="baki">Bakı</option>
+                            <option value="gence">Gəncə</option>
+                            <option value="sumqayit">Sumqayıt</option>
+                            <option value="lenkeran">Lənkəran</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Ay</label>
+                        <select class="filter-select">
+                            <option value="">Hamısı</option>
+                            <option value="1">Yanvar</option>
+                            <option value="2">Fevral</option>
+                            <option value="3">Mart</option>
+                            <option value="4">Aprel</option>
+                            <option value="5" selected>May</option>
+                            <option value="6">İyun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">İl</label>
+                        <select class="filter-select">
+
+                            <option value="2024">2024</option>
+                            <option value="2025" selected>2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Həkim adı</label>
+                        <input type="text" class="filter-input" placeholder="Həkim adı axtar...">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="filter-btn reset-btn">
+                        <i class="fas fa-undo"></i>
+                        Təmizlə
+                    </button>
+                    <button class="filter-btn apply-btn">
+                        <i class="fas fa-search"></i>
+                        Axtar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Aylıq Qeydiyyat Məlumatları</h3>
+                 </div>
+
+                <div class="rotated-table-container">
+                    <table class="rotated-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <div class="header-content">№</div>
+                                </th>
+                                <th style="width: 120px;">
+                                    <div class="header-content">Ad</div>
+                                </th>
+                                <th style="width: 80px;">
+                                    <div class="header-content">Kod</div>
+                                </th>
+                                <th style="width: 100px;">
+                                    <div class="header-content">İxtisas</div>
+                                </th>
+                                <th style="width: 90px;">
+                                    <div class="header-content">Kateqoriya</div>
+                                </th>
+                                <th style="width: 90px;">
+                                    <div class="header-content">Dərəcə</div>
+                                </th>
+                                <th style="width: 100px;">
+                                    <div class="header-content">Əvvəlki Borc</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">Parol</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">Aspirin</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">Nospa</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">İnsulin</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">Vitamin C</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">Analgin</div>
+                                </th>
+                                <th style="width: 80px;">
+                                    <div class="header-content">Total</div>
+                                </th>
+                                <th style="width: 90px;">
+                                    <div class="header-content">Hesablanan</div>
+                                </th>
+                                <th style="width: 70px;">
+                                    <div class="header-content">Avans</div>
+                                </th>
+                                <th style="width: 80px;">
+                                    <div class="header-content">İnvestisiya</div>
+                                </th>
+                                <th style="width: 90px;">
+                                    <div class="header-content">Geriqaytarma</div>
+                                </th>
+                                <th style="width: 80px;">
+                                    <div class="header-content">Datasiya</div>
+                                </th>
+                                <th style="width: 90px;">
+                                    <div class="header-content">Yekun Borc</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td class="doctor-name">
+                                    <a href="hekim-detay.html?id=DR-001">Dr. Əli Hüseynov</a>
+                                </td>
+                                <td class="doctor-code"><code>DR-001</code></td>
+                                <td class="ixtisas">Kardioloq</td>
+                                <td class="kategoriya">1-ci</td>
+                                <td class="derece">PhD</td>
+                                <td class="amount-cell borc-positive">+45.50</td>
+                                <td><div class="derman-count">24</div></td>
+                                <td><div class="derman-count">18</div></td>
+                                <td><div class="derman-count">12</div></td>
+                                <td><div class="derman-count">8</div></td>
+                                <td><div class="derman-count">30</div></td>
+                                <td><div class="derman-count">15</div></td>
+                                <td class="amount-cell total-amount">245.50</td>
+                                <td class="amount-cell hesablanan">200.00</td>
+                                <td class="amount-cell avans">50.00</td>
+                                <td class="amount-cell investisiya">25.00</td>
+                                <td class="amount-cell geriqaytarma">0.00</td>
+                                <td class="amount-cell datasiya">15.50</td>
+                                <td class="amount-cell yekun-borc borc-positive">+45.50</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td class="doctor-name">
+                                    <a href="hekim-detay.html?id=DR-002">Dr. Aygün Məmmədova</a>
+                                </td>
+                                <td class="doctor-code"><code>DR-002</code></td>
+                                <td class="ixtisas">Nevroloq</td>
+                                <td class="kategoriya">2-ci</td>
+                                <td class="derece">MD</td>
+                                <td class="amount-cell borc-negative">-25.75</td>
+                                <td><div class="derman-count">18</div></td>
+                                <td><div class="derman-count">22</div></td>
+                                <td><div class="derman-count">10</div></td>
+                                <td><div class="derman-count">6</div></td>
+                                <td><div class="derman-count">25</div></td>
+                                <td><div class="derman-count">12</div></td>
+                                <td class="amount-cell total-amount">189.75</td>
+                                <td class="amount-cell hesablanan">150.00</td>
+                                <td class="amount-cell avans">40.00</td>
+                                <td class="amount-cell investisiya">15.00</td>
+                                <td class="amount-cell geriqaytarma">10.00</td>
+                                <td class="amount-cell datasiya">20.50</td>
+                                <td class="amount-cell yekun-borc borc-negative">-25.75</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td class="doctor-name">
+                                    <a href="hekim-detay.html?id=DR-003">Dr. Rəşid İbrahimov</a>
+                                </td>
+                                <td class="doctor-code"><code>DR-003</code></td>
+                                <td class="ixtisas">Terapevt</td>
+                                <td class="kategoriya">1-ci</td>
+                                <td class="derece">PhD</td>
+                                <td class="amount-cell borc-positive">+120.25</td>
+                                <td><div class="derman-count">30</div></td>
+                                <td><div class="derman-count">15</div></td>
+                                <td><div class="derman-count">20</div></td>
+                                <td><div class="derman-count">10</div></td>
+                                <td><div class="derman-count">35</div></td>
+                                <td><div class="derman-count">18</div></td>
+                                <td class="amount-cell total-amount">320.25</td>
+                                <td class="amount-cell hesablanan">280.00</td>
+                                <td class="amount-cell avans">60.00</td>
+                                <td class="amount-cell investisiya">30.00</td>
+                                <td class="amount-cell geriqaytarma">0.00</td>
+                                <td class="amount-cell datasiya">30.25</td>
+                                <td class="amount-cell yekun-borc borc-positive">+120.25</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div class="summary-info">
+                        <div class="summary-item">
+                            <div class="summary-value">15</div>
+                            <div class="summary-label">Həkim</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">1,245.50 ₼</div>
+                            <div class="summary-label">Yekun Borc</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">284</div>
+                            <div class="summary-label">Dərman Qeydiyyatı</div>
+                        </div>
+                    </div>
+                    <div class="pagination">
+                        <button class="page-btn">Əvvəl</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">Sonra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        </div>
+    </div>
+<script src="main.js"></script>
+    <script>
+        // Menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Filter functionality
+        document.querySelector('.apply-btn').addEventListener('click', function() {
+            alert('Filter tətbiq edildi!');
+        });
+
+        document.querySelector('.reset-btn').addEventListener('click', function() {
+            const inputs = document.querySelectorAll('.filter-input, .filter-select');
+            inputs.forEach(input => {
+                if (input.type === 'text' || input.type === 'date') input.value = '';
+                else input.selectedIndex = 0;
+            });
+        });
+
+        // Export functionality
+        document.querySelector('.export-btn').addEventListener('click', function() {
+            alert('Excel faylı yüklənəcək!');
+        });
+    </script>
+</body>
+</html>
+
+
