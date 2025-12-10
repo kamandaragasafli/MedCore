@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Yeni Dərman Əlavə Et - MedAdmin{% endblock %}
+
+{% block active_drugs %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{% url 'drugs:list' %}" class="breadcrumb-link">
+            <i class="fas fa-arrow-left"></i> Dərmanlar
+        </a>
+        <h1>Yeni Dərman Əlavə Et</h1>
+        <p>Dərman məlumatlarını daxil edin</p>
+    </div>
+</div>
+
+{% if messages %}
+<div class="page-messages">
+    {% for message in messages %}
+    <div class="page-message page-message-{{ message.tags }}">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.remove()" class="message-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="form-container">
+    <form method="post" class="drug-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3><i class="fas fa-pills"></i> Əsas Məlumatlar</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ad">Ad <span class="required">*</span></label>
+                    <input type="text" id="ad" name="ad" class="form-control" required placeholder="Məsələn: Paracetamol">
+                </div>
+                
+                <div class="form-group">
+                    <label for="buraxilis_formasi">Buraxılış Forması <span class="required">*</span></label>
+                    <select id="buraxilis_formasi" name="buraxilis_formasi" class="form-control" required>
+                        {% for value, label in release_forms %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="tam_ad">Tam Ad <span class="required">*</span></label>
+                <input type="text" id="tam_ad" name="tam_ad" class="form-control" required placeholder="Dərmanın tam adı">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dozaj">Dozaj</label>
+                    <input type="text" id="dozaj" name="dozaj" class="form-control" placeholder="Məsələn: 500mg, 10ml">
+                </div>
+                
+                <div class="form-group">
+                    <label for="barkod">Barkod</label>
+                    <input type="text" id="barkod" name="barkod" class="form-control" placeholder="Barkod nömrəsi">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3><i class="fas fa-money-bill-wave"></i> Qiymət Məlumatları</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="qiymet">Qiymət (AZN) <span class="required">*</span></label>
+                    <input type="number" id="qiymet" name="qiymet" class="form-control" required step="0.01" min="0" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label for="komissiya">Komissiya (%) <span class="required">*</span></label>
+                    <input type="number" id="komissiya" name="komissiya" class="form-control" required step="0.01" min="0" max="100" placeholder="0.00">
+                </div>
+            </div>
+            
+            <div class="price-preview">
+                <div class="price-item">
+                    <span class="price-label">Əsas Qiymət:</span>
+                    <span class="price-value" id="base-price">0.00 ₼</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">Komissiya:</span>
+                    <span class="price-value" id="commission-amount">0.00 ₼</span>
+                </div>
+                <div class="price-item highlight">
+                    <span class="price-label">Yekun Qiymət:</span>
+                    <span class="price-value" id="final-price">0.00 ₼</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3><i class="fas fa-industry"></i> İstehsalçı Məlumatları</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="istehsalci">İstehsalçı</label>
+                    <input type="text" id="istehsalci" name="istehsalci" class="form-control" placeholder="Şirkət adı">
+                </div>
+                
+                <div class="form-group">
+                    <label for="olke">Ölkə</label>
+                    <input type="text" id="olke" name="olke" class="form-control" placeholder="İstehsal ölkəsi">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3><i class="fas fa-sticky-note"></i> Əlavə Məlumat</h3>
+            
+            <div class="form-group">
+                <label for="qeyd">Qeyd</label>
+                <textarea id="qeyd" name="qeyd" class="form-control" rows="4" placeholder="Əlavə qeydlər"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'drugs:list' %}" class="btn-secondary">
+                <i class="fas fa-times"></i> Ləğv et
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Yadda Saxla
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary);
+}
+
+.form-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.drug-form {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.form-section {
+    padding: 32px;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 24px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.form-section h3 i {
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.price-preview {
+    background: var(--surface-muted);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.price-item:last-child {
+    border-bottom: none;
+}
+
+.price-item.highlight {
+    background: var(--surface);
+    margin: 0 -20px -20px -20px;
+    padding: 16px 20px;
+    border-radius: 0 0 12px 12px;
+    border-top: 2px solid var(--primary);
+}
+
+.price-label {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.price-value {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text);
+}
+
+.price-item.highlight .price-label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.price-item.highlight .price-value {
+    font-size: 24px;
+    color: var(--primary);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 24px 32px;
+    background: var(--surface-muted);
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #4f46e5);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--surface-hover);
+}
+
+.page-messages {
+    margin-bottom: 24px;
+}
+
+.page-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    border-left: 4px solid;
+}
+
+.page-message i {
+    font-size: 20px;
+}
+
+.page-message span {
+    flex: 1;
+}
+
+.message-close {
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: opacity 0.2s;
+}
+
+.message-close:hover {
+    opacity: 1;
+}
+
+.page-message-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-left-color: #10b981;
+    color: #065f46;
+}
+
+.page-message-error {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-section {
+        padding: 24px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// Calculate price preview
+document.getElementById('qiymet').addEventListener('input', calculatePrice);
+document.getElementById('komissiya').addEventListener('input', calculatePrice);
+
+function calculatePrice() {
+    const price = parseFloat(document.getElementById('qiymet').value) || 0;
+    const commission = parseFloat(document.getElementById('komissiya').value) || 0;
+    
+    const commissionAmount = (price * commission) / 100;
+    const finalPrice = price + commissionAmount;
+    
+    document.getElementById('base-price').textContent = price.toFixed(2) + ' ₼';
+    document.getElementById('commission-amount').textContent = commissionAmount.toFixed(2) + ' ₼';
+    document.getElementById('final-price').textContent = finalPrice.toFixed(2) + ' ₼';
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Qeydiyyat Əlavə Et - MedAdmin{% endblock %}
+
+{% block active_prescriptions %}active{% endblock %}
+
+{% block content %}
+        <div class="ayliq-main">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Aylıq Qeydiyyat</h1>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    <span>Export</span>
+                </button>
+            </div>
+
+            <!-- Desktop Header -->
+            <div class="page-header">
+                <h1 class="page-title">Aylıq Qeydiyyat</h1>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    Excel Export
+                </button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Bölgə</label>
+                        <select class="filter-select">
+                            <option value="">Hamısı</option>
+                            <option value="baki">Bakı</option>
+                            <option value="gence">Gəncə</option>
+                            <option value="sumqayit">Sumqayıt</option>
+                            <option value="lenkeran">Lənkəran</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Ay</label>
+                        <select class="filter-select">
+                            <option value="">Hamısı</option>
+                            <option value="1">Yanvar</option>
+                            <option value="2">Fevral</option>
+                            <option value="3">Mart</option>
+                            <option value="4">Aprel</option>
+                            <option value="5" selected>May</option>
+                            <option value="6">İyun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tarix Aralığı</label>
+                        <div class="date-range">
+                            <input type="date" class="filter-input" value="2024-05-01">
+                            <input type="date" class="filter-input" value="2024-05-31">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Həkim adı</label>
+                        <input type="text" class="filter-input" placeholder="Həkim adı axtar...">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="filter-btn reset-btn">
+                        <i class="fas fa-undo"></i>
+                        Təmizlə
+                    </button>
+                    <button class="filter-btn apply-btn">
+                        <i class="fas fa-search"></i>
+                        Axtar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Aylıq Qeydiyyat Məlumatları</h3>
+                    <div class="table-info">May 2024 - Ümumi: 15 həkim</div>
+                </div>
+
+                <div class="rotated-table-container">
+                    <table class="rotated-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">
+                                    <div class="header-content">№</div>
+                                </th>
+                                <th style="width: 150px;">
+                                    <div class="header-content">Ad</div>
+                                </th>
+                                <th style="width: 100px;">
+                                    <div class="header-content">Kod</div>
+                                </th>
+                                <th style="width: 120px;">
+                                    <div class="header-content">Son Ödəniş</div>
+                                </th>
+                                <th>
+                                    <div class="header-content">Parol</div>
+                                </th>
+                                <th>
+                                    <div class="header-content">Aspirin</div>
+                                </th>
+                                <th>
+                                    <div class="header-content">Nospa</div>
+                                </th>
+                                <th>
+                                    <div class="header-content">İnsulin</div>
+                                </th>
+                                <th>
+                                    <div class="header-content">Vitamin C</div>
+                                </th>
+                                <th>
+                                    <div class="header-content">Analgin</div>
+                                </th>
+                                <th style="width: 100px;">
+                                    <div class="header-content">Total</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td class="doctor-name" style="font-size: 0.75rem"><a href="">Dr. Əli Hüseynov</a></td>
+                                <td class="doctor-code"><code>DR-001</code></td>
+                                <td class="last-payment">15.05.2024</td>
+                                <td>
+                                    <div class="derman-count">0</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">0</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">0</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">0</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">0</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">0</div>
+                                </td>
+                                <td class="total-amount">245.50 ₼</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td class="doctor-name" style="font-size: 0.75rem">Dr. Aygün Məmmədova</td>
+                                <td class="doctor-code">DR-002</td>
+                                <td class="last-payment">12.05.2024</td>
+                                <td>
+                                    <div class="derman-count">18</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">22</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">10</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">6</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">25</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">12</div>
+                                </td>
+                                <td class="total-amount">189.75 ₼</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td class="doctor-name" style="font-size: 0.75rem">Dr. Rəşid İbrahimov</td>
+                                <td class="doctor-code">DR-003</td>
+                                <td class="last-payment">10.05.2024</td>
+                                <td>
+                                    <div class="derman-count">30</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">15</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">20</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">10</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">35</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">18</div>
+                                </td>
+                                <td class="total-amount">320.25 ₼</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td class="doctor-name" style="font-size: 0.75rem">Dr. Leyla Qasımova</td>
+                                <td class="doctor-code">DR-004</td>
+                                <td class="last-payment">08.05.2024</td>
+                                <td>
+                                    <div class="derman-count">12</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">8</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">15</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">4</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">20</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">9</div>
+                                </td>
+                                <td class="total-amount">156.80 ₼</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td class="doctor-name" style="font-size: 0.75rem">Dr. Kamran Əliyev</td>
+                                <td class="doctor-code">DR-005</td>
+                                <td class="last-payment">05.05.2024</td>
+                                <td>
+                                    <div class="derman-count">25</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">12</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">18</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">7</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">28</div>
+                                </td>
+                                <td>
+                                    <div class="derman-count">14</div>
+                                </td>
+                                <td class="total-amount">278.40 ₼</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div class="summary-info">
+                        <div class="summary-item">
+                            <div class="summary-value">15</div>
+                            <div class="summary-label">Həkim</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">1,245.50 ₼</div>
+                            <div class="summary-label">Ümumi Gəlir</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">284</div>
+                            <div class="summary-label">Dərman Satışı</div>
+                        </div>
+                    </div>
+                    <div class="pagination">
+                        <button class="page-btn">Əvvəl</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">Sonra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="main.js"></script>
+    <script>
+        // Menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Filter functionality
+        document.querySelector('.apply-btn').addEventListener('click', function() {
+            alert('Filter tətbiq edildi!');
+        });
+
+        document.querySelector('.reset-btn').addEventListener('click', function() {
+            const inputs = document.querySelectorAll('.filter-input, .filter-select');
+            inputs.forEach(input => {
+                if (input.type === 'text' || input.type === 'date') input.value = '';
+                else input.selectedIndex = 0;
+            });
+        });
+
+        // Export functionality
+        document.querySelector('.export-btn').addEventListener('click', function() {
+            alert('Excel faylı yüklənəcək!');
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}

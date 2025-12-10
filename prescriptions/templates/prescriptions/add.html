@@ -1,0 +1,706 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Qeydiyyat Əlavə Et - MedAdmin{% endblock %}
+
+{% block active_prescriptions %}active{% endblock %}
+
+{% block content %}
+<div class="prescription-container">
+    <div class="prescription-layout">
+        <!-- Left Side: Form -->
+        <div class="prescription-form-section">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2>📋 Qeydiyyat Əlavə Et</h2>
+                </div>
+                
+                <form method="post" id="prescriptionForm">
+                    {% csrf_token %}
+                    
+                 
+                    
+                    <!-- Region Selection -->
+                    <div class="form-group">
+                        <label for="region_id">Bölgə *</label>
+                        <select id="region_id" name="region_id" class="form-select" required>
+                            <option value="">Bölgə seçin</option>
+                            {% for region in regions %}
+                            <option value="{{ region.id }}">{{ region.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Doctor Selection -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="doctor_id">Həkim *</label>
+                            <select id="doctor_id" name="doctor_id" class="form-select" required disabled>
+                                <option value="">Əvvəlcə bölgə seçin</option>
+                            </select>
+                            <p class="helper-text">Bölgə seçildikdən sonra həkimlər avtomatik yüklənəcək.</p>
+                        </div>
+                    
+                    <!-- Date Selection -->
+                    <div class="form-group" style="width: 200px;">
+                        <label for="date">Tarix *</label>
+                        <input type="date" id="date" name="date" class="form-input" required value="{% now 'Y-m-d' %}">
+                    </div>
+                    </div>
+                  
+                    
+                    <!-- Medicines Section -->
+                    <div class="form-section-label">Dərmanlar</div>
+                    
+                    <div class="drugs-list-container">
+                       
+                        
+                        <div class="drugs-list" id="drugsList">
+                            {% for drug in drugs %}
+                            <div class="drug-item" data-drug-name="{{ drug.ad|lower }}">
+                                <div class="drug-info">
+                                    <div class="drug-name">{{ drug.ad }}</div>
+                                    
+                                </div>
+                                <div class="drug-input">
+                                    <input type="number" name="drug_{{ drug.id }}" min="0" step="1" class="drug-qty-input">
+                                  
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Notes (Optional) -->
+                    
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Yadda Saxla
+                        </button>
+                        <button type="button" class="btn-delete" onclick="resetForm()">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                        <div class="selected-count">
+                            <span id="selectedCount">0</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Right Side: Recent Prescriptions -->
+        <div class="recent-prescriptions-section">
+            <div class="recent-card">
+                <div class="recent-header">
+                    <h3>Ən Son Qeydiyyatlar (Son 5)</h3>
+                </div>
+                
+                <div class="recent-table-wrapper">
+                    <table class="recent-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Tarix</th>
+                                <th>Qeyd</th>
+                                <th>Say</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prescription in recent_prescriptions %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ prescription.date|date:"d M Y" }}</td>
+                                <td>
+                                    <div class="detail-line emphasis">
+                                        {{ prescription.region.name|default:"-" }}{% if prescription.doctor %} - {{ prescription.doctor.ad }}{% endif %}{% if prescription.patient_name %} - {{ prescription.patient_name }}{% endif %}
+                                    </div>
+                                    {% for item in prescription.items %}
+                                    <div class="detail-line">
+                                        {{ prescription.region.name|default:"-" }} - {{ prescription.doctor.ad|default:"-" }} - {{ item.drug.ad|default:"-" }} - {{ item.quantity|default:0 }}
+                                    </div>
+                                    {% empty %}
+                                    <div class="detail-line muted">Dərman yoxdur</div>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <div class="detail-count">
+                                        <span class="badge-count">{{ prescription.item_count|default:0 }}</span>
+                                        dərman
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    Hələ ki qeydiyyat yoxdur
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.prescription-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.prescription-layout {
+    display: grid;
+    grid-template-columns: 1fr 450px;
+    gap: 24px;
+}
+
+/* Left Side - Form */
+.prescription-form-section {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.form-card {
+    
+    display: flex;
+    flex-direction: column;
+}
+
+.form-header {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-bottom: 1px solid var(--border);
+}
+
+.form-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.prescription-form-section form {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 20px 0 12px 0;
+    letter-spacing: 0.5px;
+}
+
+.form-section-label:first-child {
+    margin-top: 0;
+}
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 16px;
+    align-items: start;  /* Hər iki input eyni yerdən başlayacaq */
+}
+
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    transition: all 0.2s;
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-select.loading {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Drugs List */
+.drugs-list-container {
+    margin: 16px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+}
+
+.drugs-search {
+    margin-bottom: 12px;
+}
+
+.drugs-list {
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.drug-item {
+    margin-bottom: 4px;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+.drug-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.drug-item.selected {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.drug-info {
+    flex: 1;
+}
+
+.drug-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.drug-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.drug-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.drug-qty-input {
+    width: 80px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    background: var(--surface-muted);
+}
+
+.drug-qty-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.qty-unit {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-top: 20px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+}
+
+.btn-save,
+.btn-delete {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    flex: 1;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.selected-count {
+    padding: 8px 16px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary);
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Right Side - Recent Prescriptions */
+.recent-prescriptions-section {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+}
+
+.recent-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.recent-header {
+    padding: 20px 24px;
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.recent-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.recent-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.recent-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.recent-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--surface-muted);
+    z-index: 1;
+}
+
+.recent-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+
+.recent-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+}
+
+.recent-table tbody tr:hover {
+    background: var(--surface-hover);
+}
+
+.badge-count {
+    display: inline-block;
+    padding: 3px 10px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.amount-cell {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+@media (max-width: 1200px) {
+    .prescription-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-card,
+    .recent-prescriptions-section {
+        height: auto;
+        min-height: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .prescription-container {
+        padding: 12px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-save,
+    .btn-delete {
+        width: 100%;
+    }
+    
+    .recent-table {
+        font-size: 11px;
+    }
+    
+    .recent-table th,
+    .recent-table td {
+        padding: 8px;
+    }
+}
+</style>
+
+<script>
+const regionSelect = document.getElementById('region_id');
+const doctorSelect = document.getElementById('doctor_id');
+const prescriptionForm = document.getElementById('prescriptionForm');
+const selectedCountEl = document.getElementById('selectedCount');
+
+// ------------------------------------------
+// 1) DOCTOR SELECT RESET
+// ------------------------------------------
+function resetDoctorSelect() {
+    doctorSelect.innerHTML = '<option value="">Əvvəlcə bölgə seçin</option>';
+    doctorSelect.disabled = true;
+}
+
+// ------------------------------------------
+// 2) Bölgə seçimi dəyişəndə həkimləri yüklə
+// ------------------------------------------
+regionSelect.addEventListener('change', function() {
+    const regionId = this.value;
+    resetDoctorSelect();
+    
+    if (!regionId) return;
+    
+    doctorSelect.classList.add('loading');
+
+    fetch(`/prescriptions/api/doctors/${regionId}/`)
+        .then(res => res.json())
+        .then(data => {
+            doctorSelect.innerHTML = '';
+
+            if (!data.doctors.length) {
+                doctorSelect.innerHTML = '<option value="">Bu bölgə üçün həkim tapılmadı</option>';
+                doctorSelect.disabled = true;
+                return;
+            }
+
+            data.doctors.forEach(doc => {
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = doc.name;
+                doctorSelect.appendChild(option);
+            });
+
+            doctorSelect.disabled = false;
+
+            // Əgər yadda saxlanmış həkim varsa seç
+            const savedDoctor = localStorage.getItem('saved_doctor');
+            if (savedDoctor) {
+                doctorSelect.value = savedDoctor;
+            } else {
+                doctorSelect.value = data.doctors[0].id; // Birinci həkimi seç
+            }
+        })
+        .finally(() => doctorSelect.classList.remove('loading'));
+});
+
+
+
+
+
+// ------------------------------------------
+// 4) Dərman sayını hesabla (dinamik delegation)
+// ------------------------------------------
+function updateSelectedCount() {
+    let total = 0;
+    const inputs = document.querySelectorAll('.drug-qty-input');
+
+    inputs.forEach(input => {
+        const value = parseInt(input.value, 10);
+
+        const parent = input.closest('.drug-item');
+
+        if (value && value > 0) {
+            total += value;   // 🔥 MİQDARI TOPLA
+            parent.classList.add('selected');
+        } else {
+            parent.classList.remove('selected');
+        }
+    });
+
+    selectedCountEl.textContent = total;
+}
+
+
+// Inputlar dinamik olduqda belə işləsin:
+document.querySelector('.drugs-list').addEventListener('input', function(e) {
+    if (!e.target.classList.contains('drug-qty-input')) return;
+
+    let input = e.target;
+    if (input.value && parseInt(input.value, 10) < 0) {
+        input.value = 0;
+    }
+
+    updateSelectedCount();
+});
+
+
+// ------------------------------------------
+// 5) RESET FORM
+// ------------------------------------------
+function resetForm() {
+    if (confirm('Formu sıfırlamaq istədiyinizə əminsiniz?')) {
+        prescriptionForm.reset();
+        resetDoctorSelect();
+        document.querySelectorAll('.drug-item').forEach(i => i.classList.remove('selected'));
+        updateSelectedCount();
+    }
+}
+
+
+// ------------------------------------------
+// 6) Submit zamanı dərman yoxlanışı
+// ------------------------------------------
+prescriptionForm.addEventListener('submit', function(e) {
+    let hasValue = false;
+    document.querySelectorAll('.drug-qty-input').forEach(input => {
+        const value = parseInt(input.value, 10);
+        if (value && value > 0) {
+            hasValue = true;
+        }
+    });
+    
+    if (!hasValue) {
+        e.preventDefault();
+        alert('Ən azı bir dərman üçün miqdar daxil edilməlidir!');
+        return false;
+    }
+
+    // Region və doctor-u yadda saxla
+    localStorage.setItem('saved_region', regionSelect.value);
+    localStorage.setItem('saved_doctor', doctorSelect.value);
+});
+
+
+// ------------------------------------------
+// 7) Səhifə açılarkən region və həkim bərpa olunsun
+// ------------------------------------------
+window.addEventListener('DOMContentLoaded', function() {
+    const savedRegion = localStorage.getItem('saved_region');
+    const savedDoctor = localStorage.getItem('saved_doctor');
+
+    if (savedRegion) {
+        regionSelect.value = savedRegion;
+
+        // Həkimləri yükləyək və sonra həkimi seçək
+        fetch(`/prescriptions/api/doctors/${savedRegion}/`)
+            .then(res => res.json())
+            .then(data => {
+                doctorSelect.innerHTML = '';
+                data.doctors.forEach(doc => {
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = doc.name;
+                    doctorSelect.appendChild(option);
+                });
+
+                doctorSelect.disabled = false;
+
+                if (savedDoctor) {
+                    doctorSelect.value = savedDoctor;
+                }
+            });
+    }
+
+    updateSelectedCount();
+});
+</script>
+
+{% if messages %}
+<script>
+// Auto-scroll to top to see messages
+window.scrollTo({ top: 0, behavior: 'smooth' });
+</script>
+{% endif %}
+
+{% endblock %}
+
