@@ -184,7 +184,10 @@ def contract_view(request):
     
     if contract.agreed:
         # Already agreed, activate subscription and redirect to dashboard
-        subscription = company.active_subscription
+        subscription = company.subscriptions.filter(
+            status__in=['pending', 'active']
+        ).order_by('-created_at').first()
+        
         if subscription and subscription.status == 'pending':
             subscription.status = 'active'
             subscription.save()
@@ -199,8 +202,11 @@ def contract_view(request):
             contract.ip_address = get_client_ip(request)
             contract.save()
             
-            # Activate subscription
-            subscription = company.active_subscription
+            # Activate subscription (get pending subscription if exists)
+            subscription = company.subscriptions.filter(
+                status__in=['pending', 'active']
+            ).order_by('-created_at').first()
+            
             if subscription and subscription.status == 'pending':
                 subscription.status = 'active'
                 subscription.save()
