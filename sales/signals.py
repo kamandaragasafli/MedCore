@@ -6,8 +6,13 @@ from doctors.services.financial_calculator import recalculate_doctor_financials
 
 
 def _recalculate_for_sale_region(sale):
-    if sale and sale.region_id:
-        recalculate_doctor_financials(region_ids=[sale.region_id])
+    """Satış əlavə/dəyişdirildikdə həmin satışın ayı üçün hesablama et"""
+    if sale and sale.region_id and sale.date:
+        recalculate_doctor_financials(
+            region_ids=[sale.region_id],
+            month=sale.date.month,
+            year=sale.date.year
+        )
 
 
 @receiver(post_save, sender=Sale)

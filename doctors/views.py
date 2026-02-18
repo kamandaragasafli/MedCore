@@ -141,6 +141,7 @@ def add_doctor(request):
         telefon = request.POST.get('telefon', '').strip()
         gender = request.POST.get('gender')
         clinic_id = request.POST.get('clinic')
+        evvelki_borc = request.POST.get('evvelki_borc', '0').strip() if request.user.is_superuser else None
         
         # Validation - Required fields
         errors = []
@@ -154,8 +155,7 @@ def add_doctor(request):
             errors.append('Dərəcə seçilməlidir!')
         if not category:
             errors.append('Kateqoriya seçilməlidir!')
-        if not gender:
-            errors.append('Cinsiyyət seçilməlidir!')
+        # Cinsiyyət ad soyada görə avtomatik təyin olunur (ilk sözün sonu: a → Qadın, v → Kişi)
         
         if errors:
             for error in errors:
@@ -171,7 +171,6 @@ def add_doctor(request):
                 'ixtisas_id': ixtisas_id,
                 'degree': degree,
                 'category': category,
-                'gender': gender,
             }
             
             # Optional fields
@@ -181,6 +180,12 @@ def add_doctor(request):
                 doctor_data['telefon'] = telefon
             if clinic_id:
                 doctor_data['clinic_id'] = clinic_id
+            if request.user.is_superuser and evvelki_borc is not None:
+                try:
+                    from decimal import Decimal, InvalidOperation
+                    doctor_data['evvelki_borc'] = Decimal(str(evvelki_borc).replace(',', '.'))
+                except (InvalidOperation, ValueError, TypeError):
+                    doctor_data['evvelki_borc'] = Decimal('0.00')
             
             Doctor.objects.create(**doctor_data)
             messages.success(request, 'Həkim uğurla əlavə edildi!')
@@ -218,7 +223,10 @@ def doctor_detail(request, doctor_id):
     """
     Display detailed information about a specific doctor
     """
-    prescriptions = Prescription.objects.filter(doctor=doctor_id)
+    from django.utils import timezone
+    from django.db.models import Sum, Q
+    from datetime import datetime
+    
     try:
         doctor = Doctor.objects.select_related(
             'region',
@@ -230,9 +238,39 @@ def doctor_detail(request, doctor_id):
         messages.error(request, 'Həkim tapılmadı.')
         return redirect('doctors:list')
     
+    # Get all prescriptions for this doctor
+    prescriptions = Prescription.objects.filter(doctor=doctor_id).select_related('region').prefetch_related('items__drug').order_by('-date')
+    
+    # Calculate prescription counts
+    total_prescriptions_count = prescriptions.count()
+    
+    # Get current month prescriptions count
+    now = timezone.now()
+    current_month_prescriptions = prescriptions.filter(
+        date__month=now.month,
+        date__year=now.year
+    ).count()
+    
+    # Get payments for this doctor
+    payments = DoctorPayment.objects.filter(doctor=doctor_id).select_related('region').order_by('-date')
+    
+    # Calculate total payments amount
+    total_payments_amount = payments.aggregate(total=Sum('amount'))['total'] or 0
+    
+    # Calculate current month payments amount
+    current_month_payments = payments.filter(
+        date__month=now.month,
+        date__year=now.year
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
     context = {
         'doctor': doctor,
         'prescriptions': prescriptions,
+        'total_prescriptions_count': total_prescriptions_count,
+        'current_month_prescriptions_count': current_month_prescriptions,
+        'payments': payments,
+        'total_payments_amount': total_payments_amount,
+        'current_month_payments_amount': current_month_payments,
     }
     
     return render(request, 'doctors/detail.html', context)

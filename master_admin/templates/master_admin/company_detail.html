@@ -187,11 +187,16 @@
         <h3 style="color: var(--master-primary); margin: 0;">
             <i class="fas fa-user-md"></i> Həkimlər ({{ doctors_count|default:0 }})
         </h3>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{% url 'master_admin:export_company_doctors' company.id %}" 
                class="btn-master" 
                style="text-decoration: none; background: #10b981; padding: 8px 16px; font-size: 14px;">
                 <i class="fas fa-file-excel"></i> Excel-ə Yüklə
+            </a>
+            <a href="{% url 'master_admin:import_company_doctors_full' company.id %}" 
+               class="btn-master" 
+               style="text-decoration: none; background: #8b5cf6; padding: 8px 16px; font-size: 14px;">
+                <i class="fas fa-upload"></i> Cədvəldən Import et
             </a>
             <a href="{% url 'master_admin:import_company_debts' company.id %}" 
                class="btn-master" 
@@ -225,7 +230,7 @@
                     <td>{{ doctor.region.name|default:"-" }}</td>
                     <td>{{ doctor.clinic.name|default:"-" }}</td>
                     <td>{{ doctor.telefon|default:"-" }}</td>
-                    <td style="font-weight: bold; color: {% if doctor.yekun_borc > 0 %}#dc2626{% elif doctor.yekun_borc < 0 %}#22c55e{% else %}#666{% endif %};">
+                    <td style="font-weight: bold; color: {% if doctor.yekun_borc > 0 %}#dc2626{% elif doctor.yekun_borc < 0 %}#22c55e{% else %}#eab308{% endif %};">
                         {{ doctor.yekun_borc|floatformat:2 }} ₼
                     </td>
                     <td>
@@ -256,12 +261,24 @@
         <h3 style="color: var(--master-primary); margin: 0;">
             <i class="fas fa-chart-line"></i> Maliyyə Xülasəsi
         </h3>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'master_admin:import_company_debts' company.id %}" 
+               class="btn-master" 
+               style="text-decoration: none; background: #0ea5e9; padding: 8px 16px; font-size: 14px;">
+                <i class="fas fa-upload"></i> Borcları Excel-dən Import et
+            </a>
             <a href="{% url 'master_admin:export_company_debts' company.id %}" 
                class="btn-master" 
                style="text-decoration: none; background: #dc2626; padding: 8px 16px; font-size: 14px;">
                 <i class="fas fa-file-excel"></i> Borclar Excel-ə
             </a>
+            <form method="post" action="{% url 'master_admin:zero_company_debts' company.id %}" style="display: inline;"
+                  onsubmit="return confirm('Bütün həkimlərin əvvəlki borcu 0 ediləcək. Davam etmək istəyirsiniz?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-master" style="background: #64748b; border: none; padding: 8px 16px; font-size: 14px; cursor: pointer;">
+                    <i class="fas fa-eraser"></i> Borcları sıfırla
+                </button>
+            </form>
         </div>
     </div>
     

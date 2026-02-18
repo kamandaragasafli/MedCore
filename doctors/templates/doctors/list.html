@@ -134,7 +134,11 @@
                     </td>
                     <td>
                         <div class="doctor-info">
-                            <div class="doctor-name">{{ doctor.ad }}</div>
+                            <div class="doctor-name">
+                                <a href="{% url 'doctors:detail' doctor.id %}">
+                                    {{ doctor.ad }}
+                                </a>
+                            </div>
                             <div class="doctor-meta">
                                 <i class="fas fa-{% if doctor.gender == 'male' %}male{% elif doctor.gender == 'female' %}female{% else %}transgender{% endif %}"></i>
                                 {{ doctor.get_gender_display }}
@@ -149,7 +153,7 @@
                     <td>{{ doctor.clinic.name|default:"-" }}</td>
                     <td>
                         {% if doctor.yekun_borc > 0 %}
-                            <span class="debt debt-negative">-{{ doctor.yekun_borc }} ₼</span>
+                            <span class="debt debt-negative">{{ doctor.yekun_borc }} ₼</span>
                         {% elif doctor.yekun_borc < 0 %}
                             <span class="debt debt-positive">+{{ doctor.yekun_borc|floatformat:2|cut:"-" }} ₼</span>
                         {% else %}

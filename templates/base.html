@@ -5,7 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAdmin - Profesyonel Admin Paneli</title>
+    <title>{{ SYSTEM_NAME|default:"MedCore" }}{% if SYSTEM_SUBTITLE %} - {{ SYSTEM_SUBTITLE }}{% endif %}</title>
+    <link rel="icon" type="image/png" href="{% static SYSTEM_FAVICON|default:'img/icon.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,6 +14,154 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Apply theme immediately before page render to prevent flash
+        (function() {
+            const themes = {
+                light: {
+                    appBg: '#f6f7fb',
+                    background: '#f6f7fb',
+                    surface: '#ffffff',
+                    surfaceAlt: '#eef2ff',
+                    surfaceMuted: '#f3f6ff',
+                    primary: '#2563eb',
+                    primarySoft: '#dbe4ff',
+                    secondary: '#22d3ee',
+                    success: '#10b981',
+                    warning: '#f97316',
+                    danger: '#ef4444',
+                    text: '#0f172a',
+                    textMuted: '#8a93a6',
+                    border: '#e4e7ec',
+                    shadowLg: '0 30px 60px rgba(15, 23, 42, 0.08)'
+                },
+                dark: {
+                    appBg: '#050a1f',
+                    background: '#050a1f',
+                    surface: '#0b152c',
+                    surfaceAlt: '#1e293b',
+                    surfaceMuted: '#0f172a',
+                    primary: '#3b82f6',
+                    primarySoft: '#1e3a8a',
+                    secondary: '#8b5cf6',
+                    success: '#2dd4bf',
+                    warning: '#db6007',
+                    danger: '#ef4444',
+                    text: '#e2e8f0',
+                    textMuted: '#94a3b8',
+                    border: 'rgba(148, 163, 184, 0.2)',
+                    shadowLg: '0 20px 50px rgba(3, 7, 18, 0.55)'
+                },
+                blue: {
+                    appBg: '#e0f2fe',
+                    background: '#e0f2fe',
+                    surface: '#ffffff',
+                    surfaceAlt: '#bae6fd',
+                    surfaceMuted: '#f0f9ff',
+                    primary: '#0284c7',
+                    primarySoft: '#bae6fd',
+                    secondary: '#06b6d4',
+                    success: '#10b981',
+                    warning: '#f59e0b',
+                    danger: '#ef4444',
+                    text: '#0c4a6e',
+                    textMuted: '#64748b',
+                    border: '#7dd3fc',
+                    shadowLg: '0 30px 60px rgba(2, 132, 199, 0.15)'
+                },
+                purple: {
+                    appBg: '#faf5ff',
+                    background: '#faf5ff',
+                    surface: '#ffffff',
+                    surfaceAlt: '#f3e8ff',
+                    surfaceMuted: '#faf5ff',
+                    primary: '#9333ea',
+                    primarySoft: '#e9d5ff',
+                    secondary: '#d946ef',
+                    success: '#10b981',
+                    warning: '#f59e0b',
+                    danger: '#ef4444',
+                    text: '#581c87',
+                    textMuted: '#94a3b8',
+                    border: '#e9d5ff',
+                    shadowLg: '0 30px 60px rgba(147, 51, 234, 0.15)'
+                },
+                green: {
+                    appBg: '#f0fdf4',
+                    background: '#f0fdf4',
+                    surface: '#ffffff',
+                    surfaceAlt: '#dcfce7',
+                    surfaceMuted: '#f7fee7',
+                    primary: '#16a34a',
+                    primarySoft: '#bbf7d0',
+                    secondary: '#84cc16',
+                    success: '#22c55e',
+                    warning: '#f59e0b',
+                    danger: '#ef4444',
+                    text: '#14532d',
+                    textMuted: '#6b7280',
+                    border: '#bbf7d0',
+                    shadowLg: '0 30px 60px rgba(22, 163, 74, 0.15)'
+                },
+                darkgreen: {
+                    appBg: '#0a2817',
+                    background: '#0a2817',
+                    surface: '#0f3d23',
+                    surfaceAlt: '#15492b',
+                    surfaceMuted: '#1a5535',
+                    primary: '#10b981',
+                    primarySoft: '#064e3b',
+                    secondary: '#34d399',
+                    success: '#6ee7b7',
+                    warning: '#fbbf24',
+                    danger: '#f87171',
+                    text: '#d1fae5',
+                    textMuted: '#86efac',
+                    border: 'rgba(16, 185, 129, 0.3)',
+                    shadowLg: '0 20px 50px rgba(6, 78, 59, 0.5)'
+                },
+                red: {
+                    appBg: '#fef2f2',
+                    background: '#fef2f2',
+                    surface: '#ffffff',
+                    surfaceAlt: '#fee2e2',
+                    surfaceMuted: '#fef2f2',
+                    primary: '#dc2626',
+                    primarySoft: '#fecaca',
+                    secondary: '#f87171',
+                    success: '#10b981',
+                    warning: '#f59e0b',
+                    danger: '#b91c1c',
+                    text: '#7f1d1d',
+                    textMuted: '#94a3b8',
+                    border: '#fecaca',
+                    shadowLg: '0 30px 60px rgba(220, 38, 38, 0.15)'
+                }
+            };
+
+            try {
+                const savedTheme = localStorage.getItem('selectedTheme') || 'light';
+                const theme = themes[savedTheme] || themes.light;
+                const root = document.documentElement;
+
+                // Set data-theme attribute for dark mode
+                if (savedTheme === 'dark') {
+                    root.setAttribute('data-theme', 'dark');
+                } else {
+                    root.removeAttribute('data-theme');
+                }
+
+                // Apply CSS variables immediately
+                Object.keys(theme).forEach(key => {
+                    const cssVarName = '--' + key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                    root.style.setProperty(cssVarName, theme[key]);
+                });
+            } catch (e) {
+                // If localStorage fails, use default light theme
+                console.error('Theme loading error:', e);
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -22,14 +171,23 @@
             <div class="brand-logo">
                 <img src="{{ company.logo.url }}" alt="{{ company.name }}">
             </div>
+            {% elif SYSTEM_LOGO %}
+            <div class="brand-logo">
+                <img src="{% static SYSTEM_LOGO|default:'img/icon.png' %}" alt="{{ SYSTEM_NAME|default:'MedCore' }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="brand-icon" style="display: none;">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+            </div>
             {% else %}
             <div class="brand-icon">
                 <i class="fas fa-heartbeat"></i>
             </div>
             {% endif %}
             <div>
-                <div class="brand-title">{{ company.name }}</div>
-                <div class="brand-subtitle">Sağlamlıq İdarəetmə Paneli</div>
+                <div class="brand-title">{{ company.name|default:SYSTEM_NAME|default:"MedCore" }}</div>
+                {% if SYSTEM_SUBTITLE %}
+                <div class="brand-subtitle">{{ SYSTEM_SUBTITLE }}</div>
+                {% endif %}
             </div>
         </div>
         <div class="sidebar-menu">
@@ -59,10 +217,10 @@
                 <span class="menu-badge"></span> 
             </a> -->
 
-            <a href="" class="menu-item {% block active_datasiya %}{% endblock %}">
+            <!-- <a href="{% url 'reports:list' %}" class="menu-item {% block active_datasiya %}{% endblock %}">
                 <i class="fas fa-database"></i>
                 <span class="menu-text">Datasiya</span>
-            </a>
+            </a> -->
 
             <a href="{% url 'drugs:list' %}" class="menu-item {% block active_drugs %}{% endblock %}">
                 <i class="fas fa-pills"></i>
@@ -88,6 +246,10 @@
             <a href="{% url 'sales:add' %}" class="menu-item {% block active_add_sale %}{% endblock %}">
                 <i class="fas fa-chart-line"></i>
                 <span class="menu-text">Satış Əlavə et</span>
+            </a>
+            <a href="{% url 'sales:sale_list' %}" class="menu-item {% block active_sale_list %}{% endblock %}">
+                <i class="fas fa-edit"></i>
+                <span class="menu-text">Satış qeydləri</span>
             </a>
 
             <a href="{% url 'reports:list' %}" class="menu-item {% block active_reports %}{% endblock %}">
@@ -259,61 +421,6 @@
             </div>
             
             <div class="chatbot-messages" id="chatbot-messages">
-                <div class="message-date">Bu gün, 14:35</div>
-                
-                <div class="chat-message bot-message">
-                    <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <div class="message-text">
-                            Salam! Mən sizin AI Tibbi Assistentinizəm. Bu gün sizə necə kömək edə bilərəm? Mən aşağıdakılarda kömək edə bilərəm:
-                            <ul>
-                                <li>Görüş planlaşdırma</li>
-                                <li>Xəstə məlumatları</li>
-                                <li>Tibbi sorğular</li>
-                                <li>Hesabat yaradılması</li>
-                            </ul>
-                        </div>
-                        <div class="message-time">14:35</div>
-                    </div>
-                </div>
-                
-                <div class="chat-message user-message">
-                    <div class="message-content">
-                        <div class="message-text">
-                            Bugünkü görüşləri göstər
-                        </div>
-                        <div class="message-time">14:36</div>
-                    </div>
-                </div>
-                
-                <div class="chat-message bot-message">
-                    <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <div class="message-text">
-                            Bugün üçün 12 görüş planlaşdırılıb. Növbəti görüş saat 10:00-da David Miller ilə Ümumi Müayinə üçündür.
-                        </div>
-                        <div class="message-time">14:36</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chatbot-quick-actions">
-                <button class="quick-action-btn">
-                    <i class="fas fa-calendar"></i>
-                    Bugünkü Cədvəl
-                </button>
-                <button class="quick-action-btn">
-                    <i class="fas fa-users"></i>
-                    Xəstə Siyahısı
-                </button>
-                <button class="quick-action-btn">
-                    <i class="fas fa-chart-line"></i>
-                    Statistika
-                </button>
             </div>
             
             <div class="chatbot-input-area">
@@ -443,8 +550,8 @@ window.selectTheme = selectTheme;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Load saved theme
-    loadSavedTheme();
+    // Theme is already applied by inline script in head, so we don't need to load it again
+    // This prevents the flash of light mode
     
     // Close modal when clicking outside
     const modal = document.getElementById('colorPickerModal');
@@ -518,6 +625,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const chatbotSend = document.getElementById('chatbot-send');
         const chatbotMessages = document.getElementById('chatbot-messages');
 
+        const CHATBOT_SEND_URL = "{% url 'chatbot:send_message' %}";
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const parts = document.cookie.split('; ');
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i].split('=');
+                    if (part[0].trim() === name) {
+                        cookieValue = decodeURIComponent(part[1].trim());
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Open chatbot
         chatbotToggle.addEventListener('click', function() {
             chatbotPanel.classList.add('active');
@@ -536,51 +664,92 @@ document.addEventListener('DOMContentLoaded', function() {
         chatbotClose.addEventListener('click', closeChatbot);
         chatbotOverlay.addEventListener('click', closeChatbot);
 
-        // Send message function
+        // Send message function – real API call to chatbot backend
         function sendMessage() {
             const message = chatbotInput.value.trim();
             if (!message) return;
 
-            // Add user message
             const userMessageHTML = `
                 <div class="chat-message user-message">
                     <div class="message-content">
-                        <div class="message-text">${message}</div>
+                        <div class="message-text">${escapeHtml(message)}</div>
                         <div class="message-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
                 </div>
             `;
             chatbotMessages.insertAdjacentHTML('beforeend', userMessageHTML);
             chatbotInput.value = '';
-
-            // Scroll to bottom
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
 
-            // Simulate bot response after 1 second
-            setTimeout(() => {
-                const botResponses = [
-                    "I'm processing your request. Please wait a moment...",
-                    "Let me check that information for you.",
-                    "I found the information you requested. Would you like me to elaborate?",
-                    "That's a great question! Here's what I can tell you...",
-                    "Based on the current data, I can help you with that."
-                ];
-                const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+            const loadingId = 'chatbot-loading-' + Date.now();
+            const loadingHTML = `
+                <div class="chat-message bot-message" id="${loadingId}">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text"><i class="fas fa-spinner fa-spin"></i> Cavab gözlənilir...</div>
+                    </div>
+                </div>
+            `;
+            chatbotMessages.insertAdjacentHTML('beforeend', loadingHTML);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
 
+            fetch(CHATBOT_SEND_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    if (!response.ok) {
+                        data = data || {};
+                        data.success = false;
+                        data.error = data.error || 'Cavab alınmadı.';
+                    }
+                    return data;
+                }).catch(function() {
+                    return { success: false, error: 'Cavab alınmadı.' };
+                });
+            })
+            .then(function(data) {
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+                const text = data.success ? (data.message || '') : (data.error || 'Cavab alınmadı.');
                 const botMessageHTML = `
                     <div class="chat-message bot-message">
                         <div class="message-avatar">
                             <i class="fas fa-robot"></i>
                         </div>
                         <div class="message-content">
-                            <div class="message-text">${randomResponse}</div>
+                            <div class="message-text">${escapeHtml(text)}</div>
                             <div class="message-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                     </div>
                 `;
                 chatbotMessages.insertAdjacentHTML('beforeend', botMessageHTML);
                 chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-            }, 1000);
+            })
+            .catch(function(err) {
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+                const botMessageHTML = `
+                    <div class="chat-message bot-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">${escapeHtml('Bağlantı xətası. Zəhmət olmasa yenidən cəhd edin.')}</div>
+                            <div class="message-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                    </div>
+                `;
+                chatbotMessages.insertAdjacentHTML('beforeend', botMessageHTML);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            });
         }
 
         // Send message on button click

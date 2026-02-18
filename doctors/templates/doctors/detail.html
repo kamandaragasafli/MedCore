@@ -134,9 +134,9 @@
                     <div class="summary-label">Yekun Borc</div>
                     <div class="summary-value {% if doctor.yekun_borc > 0 %}debt{% elif doctor.yekun_borc < 0 %}credit{% else %}zero{% endif %}">
                         {% if doctor.yekun_borc > 0 %}
-                            -{{ doctor.yekun_borc|floatformat:2 }} ₼
+                            {{ doctor.yekun_borc|floatformat:2 }} ₼
                         {% elif doctor.yekun_borc < 0 %}
-                            +{{ doctor.yekun_borc|floatformat:2|cut:"-" }} ₼
+                            -{{ doctor.yekun_borc|floatformat:2|cut:"-" }} ₼
                         {% else %}
                             0.00 ₼
                         {% endif %}
@@ -151,8 +151,8 @@
                 </div>
                 <div class="summary-content">
                     <div class="summary-label">Cəmi Reseptlər</div>
-                    <div class="summary-value">0</div>
-                    <div class="summary-status">Bu ay</div>
+                    <div class="summary-value">{{ total_prescriptions_count }}</div>
+                    <div class="summary-status">Bu ay: {{ current_month_prescriptions_count }}</div>
                 </div>
             </div>
             
@@ -162,8 +162,8 @@
                 </div>
                 <div class="summary-content">
                     <div class="summary-label">Ödənişlər</div>
-                    <div class="summary-value positive">0.00 ₼</div>
-                    <div class="summary-status">Bu ay</div>
+                    <div class="summary-value positive">{{ total_payments_amount|floatformat:2 }} ₼</div>
+                    <div class="summary-status">Bu ay: {{ current_month_payments_amount|floatformat:2 }} ₼</div>
                 </div>
             </div>
         </div>
@@ -174,9 +174,9 @@
                 <i class="fas fa-prescription"></i>
                 <h3>Resep Yazılışları</h3>
                 <div class="card-actions">
-                    <button class="action-icon-btn" title="Yeni resep">
+                    <a href="{% url 'prescriptions:add' %}" class="action-icon-btn" title="Yeni resep">
                         <i class="fas fa-plus"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
             <div class="card-body">
@@ -187,42 +187,41 @@
                             <tr>
                                 <th>Tarix</th>
                                 <th>Bölgə</th>
-                                <th>Növ</th>
+                                <th>Dərman</th>
                                 <th>Say</th>
-                             
                             </tr>
                         </thead>
                         <tbody>
                             {% for prescription in prescriptions %}
                                 {% for item in prescription.items.all %}
                                     <tr>
-                                        <!-- TARIX -->
                                         <td>{{ prescription.date|date:"d.m.Y" }}</td>
                                         <td>{{ prescription.region.name|default:"-" }}</td>
-                    
-                                        <!-- DƏRMAN ADI -->
                                         <td class="text-success">{{ item.drug.ad }}</td>
-                    
-                                        <!-- SAY -->
                                         <td class="text-success">{{ item.quantity }}</td>
                                     </tr>
+                                {% empty %}
+                                    {% if forloop.first %}
+                                    <tr>
+                                        <td colspan="4" style="text-align:center; padding:20px;">Bu reseptdə dərman yoxdur</td>
+                                    </tr>
+                                    {% endif %}
                                 {% endfor %}
                             {% empty %}
                                 <tr>
-                                    <td colspan="3" style="text-align:center; padding:20px;">Resept yoxdur</td>
+                                    <td colspan="4" style="text-align:center; padding:20px;">Resept yoxdur</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
-                            
                     </table>
                 </div>
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-prescription fa-3x"></i>
                     <p>Hələ ki resep yazılışı yoxdur</p>
-                    <button class="primary-btn">
+                    <a href="{% url 'prescriptions:add' %}" class="primary-btn">
                         <i class="fas fa-plus"></i> İlk Resep Əlavə Et
-                    </button>
+                    </a>
                 </div>
                 {% endif %}
                 
@@ -245,43 +244,40 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="empty-state">
-                    <i class="fas fa-credit-card fa-3x"></i>
-                    <p>Hələ ki ödəniş qeydləri yoxdur</p>
-                    <button class="primary-btn">
-                        <i class="fas fa-plus"></i> İlk Ödəniş Əlavə Et
-                    </button>
-                </div>
-                
-                <!-- Example of how payments will look when data exists -->
-              
+                {% if payments %}
                 <div class="payments-table">
                     <table>
                         <thead>
                             <tr>
                                 <th>Tarix</th>
+                                <th>Bölgə</th>
                                 <th>Məbləğ</th>
                                 <th>Növ</th>
                                 <th>Status</th>
-                                <th>Qeyd</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for payment in payments %}
                             <tr>
-                                <td>24.11.2025</td>
-                                <td class="amount positive">+500.00 ₼</td>
-                                <td><span class="payment-type">Avans</span></td>
+                                <td>{{ payment.date|date:"d.m.Y" }}</td>
+                                <td>{{ payment.region.name|default:"-" }}</td>
+                                <td class="amount positive">+{{ payment.amount|floatformat:2 }} ₼</td>
+                                <td><span class="payment-type">{{ payment.get_payment_type_display }}</span></td>
                                 <td><span class="status-badge success">Tamamlandı</span></td>
-                                <td>Aylıq ödəniş</td>
-                                <td>
-                                    <button class="icon-btn"><i class="fas fa-eye"></i></button>
-                                </td>
                             </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
-               
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-credit-card fa-3x"></i>
+                    <p>Hələ ki ödəniş qeydləri yoxdur</p>
+                    <a href="{% url 'doctors:add_payment' %}" class="primary-btn">
+                        <i class="fas fa-plus"></i> İlk Ödəniş Əlavə Et
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -439,6 +435,11 @@
 .text-muted {
     color: var(--text-muted) !important;
     font-weight: 400 !important;
+}
+
+.text-success {
+    color: #10b981;
+    font-weight: 600;
 }
 
 .code-badge {
@@ -609,6 +610,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .action-icon-btn:hover {
@@ -632,6 +634,28 @@
 .empty-state p {
     font-size: 16px;
     margin-bottom: 20px;
+}
+
+.primary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.primary-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 /* Prescriptions List */

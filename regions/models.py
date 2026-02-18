@@ -1,10 +1,18 @@
 from django.db import models
+import random
+import string
 
 
 class Region(models.Model):
     """Bölgə (Region) Model"""
     name = models.CharField(max_length=100, verbose_name="Bölgə Adı")
-    code = models.CharField(max_length=10, unique=True, verbose_name="Bölgə Kodu")
+    code = models.CharField(
+        max_length=10,
+        unique=True,
+        blank=True,
+        verbose_name="Bölgə Kodu",
+        help_text="Unikal kod (avtomatik yaradılır)"
+    )
 
     class Meta:
         verbose_name = "Bölgə"
@@ -13,6 +21,26 @@ class Region(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        # Auto-generate code if not provided
+        if not self.code:
+            self.code = self.generate_unique_code()
+        super().save(*args, **kwargs)
+
+    def generate_unique_code(self):
+        """Generate a unique code for the region"""
+        # Try to create code from name first (first 3-4 letters uppercase)
+        if self.name:
+            base_code = ''.join(c for c in self.name.upper() if c.isalnum())[:4]
+            if base_code and not Region.objects.filter(code=base_code).exists():
+                return base_code
+        
+        # If name-based code exists or name is empty, generate random code
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            if not Region.objects.filter(code=code).exists():
+                return code
 
 
 class City(models.Model):
@@ -34,7 +62,7 @@ class Clinic(models.Model):
     name = models.CharField(max_length=200, verbose_name="Klinika Adı")
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='clinics', verbose_name="Bölgə")
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='clinics', verbose_name="Şəhər")
-    address = models.TextField(verbose_name="Ünvan")
+    address = models.TextField(blank=True, null=True, verbose_name="Ünvan")
     phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="Əlaqə Nömrəsi")
     type = models.CharField(
         max_length=50,

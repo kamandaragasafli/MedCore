@@ -17,9 +17,6 @@
         {% endif %}
     </div>
     <div class="header-actions">
-        <a href="#" class="ghost-btn">
-            <i class="fas fa-edit"></i> Redaktə et
-        </a>
         <a href="#" class="ghost-btn" onclick="window.print(); return false;">
             <i class="fas fa-print"></i> Çap et
         </a>
@@ -40,32 +37,20 @@
                 <i class="fas fa-tag"></i>
             </div>
             <div class="price-summary-content">
-                <div class="price-summary-label">Əsas Qiymət</div>
+                <div class="price-summary-label">Qiymət</div>
                 <div class="price-summary-value">{{ drug.qiymet|floatformat:2 }} ₼</div>
             </div>
         </div>
         
-        <div class="price-summary-divider">+</div>
-        
-        <div class="price-summary-item">
-            <div class="price-summary-icon">
-                <i class="fas fa-percentage"></i>
-            </div>
-            <div class="price-summary-content">
-                <div class="price-summary-label">Komissiya ({{ drug.komissiya }}%)</div>
-                <div class="price-summary-value positive">{{ drug.komissiya_meblegi|floatformat:2 }} ₼</div>
-            </div>
-        </div>
-        
-        <div class="price-summary-divider">=</div>
+        <div class="price-summary-divider"></div>
         
         <div class="price-summary-item highlight">
             <div class="price-summary-icon">
                 <i class="fas fa-money-bill-wave"></i>
             </div>
             <div class="price-summary-content">
-                <div class="price-summary-label">Yekun Qiymət</div>
-                <div class="price-summary-value final">{{ drug.yekun_qiymet|floatformat:2 }} ₼</div>
+                <div class="price-summary-label">Komissiya</div>
+                <div class="price-summary-value final positive">{{ drug.komissiya|floatformat:2 }} ₼</div>
             </div>
         </div>
     </div>
@@ -118,44 +103,12 @@
             </div>
             <div class="card-body">
                 <div class="info-row">
-                    <div class="info-label">Əsas Qiymət:</div>
+                    <div class="info-label">Qiymət:</div>
                     <div class="info-value price-value">{{ drug.qiymet|floatformat:2 }} ₼</div>
                 </div>
-                <div class="info-row">
-                    <div class="info-label">Komissiya Faizi:</div>
-                    <div class="info-value">{{ drug.komissiya|floatformat:2 }}%</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Komissiya Məbləği:</div>
-                    <div class="info-value positive-value">+{{ drug.komissiya_meblegi|floatformat:2 }} ₼</div>
-                </div>
                 <div class="info-row highlight-row">
-                    <div class="info-label">Yekun Qiymət:</div>
-                    <div class="info-value final-price">{{ drug.yekun_qiymet|floatformat:2 }} ₼</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Manufacturer Information -->
-        <div class="detail-card">
-            <div class="card-header">
-                <i class="fas fa-industry"></i>
-                <h3>İstehsalçı Məlumatları</h3>
-            </div>
-            <div class="card-body">
-                <div class="info-row">
-                    <div class="info-label">İstehsalçı:</div>
-                    <div class="info-value">{{ drug.istehsalci|default:"-" }}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Ölkə:</div>
-                    <div class="info-value">
-                        {% if drug.olke %}
-                            <span class="country-badge">{{ drug.olke }}</span>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </div>
+                    <div class="info-label">Komissiya:</div>
+                    <div class="info-value final-price positive-value">{{ drug.komissiya|floatformat:2 }} ₼</div>
                 </div>
             </div>
         </div>
@@ -186,20 +139,6 @@
             </div>
         </div>
 
-        <!-- Additional Notes (Full Width if exists) -->
-        {% if drug.qeyd %}
-        <div class="detail-card full-width">
-            <div class="card-header">
-                <i class="fas fa-sticky-note"></i>
-                <h3>Əlavə Qeydlər</h3>
-            </div>
-            <div class="card-body">
-                <div class="notes-content">
-                    {{ drug.qeyd }}
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 

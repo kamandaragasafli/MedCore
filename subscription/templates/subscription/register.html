@@ -313,112 +313,52 @@
                 </div>
                 {% endif %}
 
-                <form method="post" action="{% url 'subscription:register' %}">
+                <form method="post" action="{% url 'subscription:register' %}{% if plan_id %}?plan={{ plan_id }}{% endif %}">
                     {% csrf_token %}
-
-                    <div class="form-section">
-                        <div class="section-title">
-                            <i class="fas fa-building"></i>
-                            Şirkət Məlumatları
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="company_name">Şirkət Adı *</label>
-                            <input type="text" id="company_name" name="company_name" required>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="company_email">Şirkət E-poçtu *</label>
-                                <input type="email" id="company_email" name="company_email" required>
+                    
+                    {% if plan %}
+                    <div class="form-section" style="background: #f0f4ff; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: #667eea;">Seçilmiş Paket:</strong>
+                                <div style="color: #1f2937; margin-top: 4px;">{{ plan.name }}</div>
                             </div>
-
-                            <div class="form-group">
-                                <label for="company_phone">Telefon Nömrəsi</label>
-                                <input type="tel" id="company_phone" name="company_phone">
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: 700; color: #667eea;">{{ plan.price_monthly }} ₼</div>
+                                <div style="font-size: 12px; color: #6b7280;">/ ay</div>
                             </div>
                         </div>
                     </div>
+                    <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                    {% endif %}
 
-                    <div class="form-section">
-                        <div class="section-title">
-                            <i class="fas fa-user"></i>
-                            Admin Hesabı
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="first_name">Ad *</label>
-                                <input type="text" id="first_name" name="first_name" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="last_name">Soyad *</label>
-                                <input type="text" id="last_name" name="last_name" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="username">İstifadəçi Adı *</label>
-                            <input type="text" id="username" name="username" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">E-poçt *</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="password">Şifrə *</label>
-                                <input type="password" id="password" name="password" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="password_confirm">Şifrəni Təsdiqləyin *</label>
-                                <input type="password" id="password_confirm" name="password_confirm" required>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="company_name">Şirkət Adı *</label>
+                        <input type="text" id="company_name" name="company_name" required>
                     </div>
 
-                    <div class="form-section">
-                        <div class="section-title">
-                            <i class="fas fa-crown"></i>
-                            Planınızı Seçin
-                        </div>
+                    <div class="form-group">
+                        <label for="company_phone">Nömrə *</label>
+                        <input type="tel" id="company_phone" name="company_phone" required>
+                    </div>
 
-                        <div class="plan-selector">
-                            {% for plan in plans %}
-                            <label class="plan-option">
-                                <input type="radio" name="plan_id" value="{{ plan.id }}" {% if forloop.first %}checked{% endif %}>
-                                <div class="plan-content">
-                                    <div class="plan-info">
-                                        <h4>{{ plan.name }}</h4>
-                                        <p>{{ plan.description }}</p>
-                                    </div>
-                                    <div class="plan-price">${{ plan.price_monthly }}/mo</div>
-                                </div>
-                            </label>
-                            {% endfor %}
-                        </div>
+                    <div class="form-group">
+                        <label for="username">İstifadəçi Adı *</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
 
-                        <div class="form-group" style="margin-top: 20px;">
-                            <label>Ödəniş Dövrü</label>
-                            <div class="billing-cycle">
-                                <div class="billing-option">
-                                    <input type="radio" name="billing_cycle" value="monthly" id="monthly" checked>
-                                    <label for="monthly">Aylıq</label>
-                                </div>
-                                <div class="billing-option">
-                                    <input type="radio" name="billing_cycle" value="yearly" id="yearly">
-                                    <label for="yearly">İllik (20% Endirim)</label>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="password">Parol *</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password_confirm">Parol Təsdiqlə *</label>
+                        <input type="password" id="password_confirm" name="password_confirm" required>
                     </div>
 
                     <button type="submit" class="submit-btn">
-                        <i class="fas fa-rocket"></i> Pulsuz Sınağa Başla
+                        <i class="fas fa-rocket"></i> Qeydiyyatdan Keç
                     </button>
 
                     <div class="login-link">

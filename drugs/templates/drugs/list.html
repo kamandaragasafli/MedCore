@@ -8,12 +8,13 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1>Dərmanlar</h1>
-        <p>Cəmi {{ total_drugs }} dərman</p>
+        <div class="page-eyebrow">Dərmanlar</div>
+        <h1>Dərman Siyahısı</h1>
+        <p>Bütün dərmanların siyahısı</p>
     </div>
     <div class="header-actions">
         <a href="{% url 'drugs:add' %}" class="primary-btn">
-            <i class="fas fa-plus"></i> Yeni Dərman Əlavə Et
+            <i class="fas fa-plus"></i> Yeni Dərman
         </a>
     </div>
 </div>

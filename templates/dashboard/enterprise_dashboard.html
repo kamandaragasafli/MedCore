@@ -307,13 +307,24 @@ document.addEventListener('DOMContentLoaded', function() {
         elements: { point: { radius: 0 }, line: { tension: 0.4 } }
     };
     
+    // Real data from backend
+    const doctorsTrendData = {{ doctors_trend_data|safe|default:"[]" }};
+    const monthlyPrescriptionData = {{ monthly_prescription_data|safe|default:"[]" }};
+    const monthlySalesData = {{ monthly_sales_data|safe|default:"[]" }};
+    const monthlyRevenueData = {{ monthly_revenue_data|safe|default:"[]" }};
+    const prescriptionChartData = {{ prescription_chart_data|safe|default:"[]" }};
+    const prescriptionChartLabels = {{ prescription_chart_labels|safe|default:"[]" }};
+    const revenueChartData = {{ revenue_chart_data|safe|default:"[]" }};
+    const salesChartLabels = {{ sales_chart_labels|safe|default:"[]" }};
+    const monthlyLabels = {{ monthly_labels|safe|default:"[]" }};
+    
     // Sparklines
     new Chart(document.getElementById('sparkline-doctors'), {
         type: 'line',
         data: {
             labels: Array(12).fill(''),
             datasets: [{
-                data: Array(12).fill(0).map(() => Math.floor(Math.random() * 10) + {{ total_doctors }} - 5),
+                data: doctorsTrendData.length > 0 ? doctorsTrendData : Array(12).fill({{ total_doctors }}),
                 borderColor: '#2563eb',
                 backgroundColor: 'rgba(37, 99, 235, 0.1)',
                 fill: true,
@@ -328,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: Array(12).fill(''),
             datasets: [{
-                data: Array(12).fill(0).map(() => Math.floor(Math.random() * 20) + {{ prescriptions_last_30 }} - 10),
+                data: monthlyPrescriptionData.length > 0 ? monthlyPrescriptionData : Array(12).fill({{ prescriptions_last_30 }}),
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 fill: true,
@@ -343,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: Array(12).fill(''),
             datasets: [{
-                data: Array(12).fill(0).map(() => Math.floor(Math.random() * 15) + {{ total_sales }} - 7),
+                data: monthlySalesData.length > 0 ? monthlySalesData : Array(12).fill({{ total_sales }}),
                 borderColor: '#f59e0b',
                 backgroundColor: 'rgba(245, 158, 11, 0.1)',
                 fill: true,
@@ -358,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: Array(12).fill(''),
             datasets: [{
-                data: Array(12).fill(0).map(() => Math.random() * 1000 + 500),
+                data: monthlyRevenueData.length > 0 ? monthlyRevenueData : Array(12).fill(0),
                 borderColor: '#8b5cf6',
                 backgroundColor: 'rgba(139, 92, 246, 0.1)',
                 fill: true,
@@ -372,14 +383,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const prescriptionChart = new Chart(document.getElementById('prescription-chart'), {
         type: 'line',
         data: {
-            labels: Array(30).fill(0).map((_, i) => {
+            labels: prescriptionChartLabels.length > 0 ? prescriptionChartLabels : Array(30).fill(0).map((_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (29 - i));
                 return date.toLocaleDateString('az-AZ', { day: '2-digit', month: '2-digit' });
             }),
             datasets: [{
                 label: 'Qeydiyyatlar',
-                data: Array(30).fill(0).map(() => Math.floor(Math.random() * 10) + 5),
+                data: prescriptionChartData.length > 0 ? prescriptionChartData : Array(30).fill(0),
                 borderColor: '#2563eb',
                 backgroundColor: 'rgba(37, 99, 235, 0.1)',
                 fill: true,
@@ -404,14 +415,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const revenueChart = new Chart(document.getElementById('revenue-chart'), {
         type: 'bar',
         data: {
-            labels: Array(30).fill(0).map((_, i) => {
+            labels: salesChartLabels.length > 0 ? salesChartLabels : Array(30).fill(0).map((_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (29 - i));
                 return date.toLocaleDateString('az-AZ', { day: '2-digit', month: '2-digit' });
             }),
             datasets: [{
                 label: 'Gəlir (₼)',
-                data: Array(30).fill(0).map(() => Math.random() * 500 + 100),
+                data: revenueChartData.length > 0 ? revenueChartData : Array(30).fill(0),
                 backgroundColor: 'rgba(245, 158, 11, 0.8)',
                 borderRadius: 8
             }]
@@ -434,10 +445,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const monthlyTrendChart = new Chart(document.getElementById('monthly-trend-chart'), {
         type: 'bar',
         data: {
-            labels: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek'],
+            labels: monthlyLabels.length > 0 ? monthlyLabels : ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek'],
             datasets: [{
                 label: 'Qeydiyyatlar',
-                data: Array(12).fill(0).map(() => Math.floor(Math.random() * 100) + 50),
+                data: monthlyPrescriptionData.length > 0 ? monthlyPrescriptionData : Array(12).fill(0),
                 backgroundColor: 'rgba(37, 99, 235, 0.8)',
                 borderRadius: 8
             }]

@@ -92,16 +92,50 @@ def send_message(request):
         
         # Build system message with context
         company_name = request.company.name if hasattr(request, 'company') and request.company else 'Şirkət'
-        system_message = f"""Sən tibbi idarəetmə sisteminin AI asistanısan. Şirkət adı: {company_name}
+        
+        # Read user guide for help support information
+        from pathlib import Path
+        guide_path = Path(settings.BASE_DIR) / 'AI_USER_GUIDE.md'
+        user_guide_content = ""
+        if guide_path.exists():
+            try:
+                with open(guide_path, 'r', encoding='utf-8') as f:
+                    user_guide_content = f.read()
+            except Exception as e:
+                logger.warning(f"Could not read AI_USER_GUIDE.md: {e}")
+        
+        # Default fallback content
+        default_content = """MedCore tibbi idarəetmə sistemidir. Sistemdə həkimlər, dərmanlar, resept qeydiyyatları, satışlar və hesabatlar idarə olunur.
 
-Sənə kömək edə biləcəyin əsas funksiyalar:
-- Həkim məlumatları haqqında sorğular
-- Qeydiyyat və resept məlumatları
-- Satış və ödəniş statistikaları
-- Hesabatlar haqqında məlumat
-- Ümumi sistem istifadəsi məsləhətləri
+Əsas funksiyalar:
+- Həkim idarəetməsi: Həkimlərin siyahısı, əlavə etmə, detay səhifəsi
+- Dərman idarəetməsi: Dərmanların siyahısı və əlavə etmə
+- Resept qeydiyyatı: Reseptlərin əlavə edilməsi və siyahısı
+- Satış idarəetməsi: Satışların əlavə edilməsi və redaktəsi
+- Hesabatlar: Aylıq hesabatların yaradılması və bağlanması
 
-Cavablarını Azərbaycan dilində ver. Qısa, dəqiq və faydalı ol.
+Maliyyə hesablamaları avtomatikdir. Resept və ya satış əlavə edildikdə həkimin borc məlumatları avtomatik yenilənir."""
+        
+        guide_text = user_guide_content[:6000] if user_guide_content else default_content
+        
+        system_message = f"""Sən MedCore tibbi idarəetmə sisteminin köməkçi asistanısan. Şirkət adı: {company_name}
+
+ƏSAS QAYDALAR:
+1. Cavablarını həmişə Azərbaycan dilində ver
+2. Qısa və aydın cavablar ver (maksimum 2-3 cümlə)
+3. Admin panel, master admin, superuser, kod, texniki detallar haqqında danışma
+4. Sadəcə istifadəçiyə kömək et - sistemdə necə işləməyi izah et
+5. Help dəstəyi kimi işlə - praktik məsləhətlər ver
+
+SİSTEM HAQQINDA MƏLUMAT (İSTİFADƏÇİ ÜÇÜN):
+{guide_text}
+
+NÜMUNƏ SUALLAR VƏ CAVABLAR:
+- "Resept necə əlavə edim?" → "Bölgə seçin, həkim seçin, tarix seçin, dərmanlar üçün miqdar daxil edin və göndərin."
+- "Həkim borcu necə hesablanır?" → "Həkimin borcu avtomatik hesablanır. Resept və satışlar üzrə komissiya hesablanır və həkimin dərəcəsinə görə faktor tətbiq edilir."
+- "Excel import necə işləyir?" → "Excel faylında lazımi sütunları doldurun və import edin. Dərmanlar üçün: Ad, Tam Ad, Komissiya, Qiymət. Borclar üçün: Bölgə, Həkim adı, Yekun Borc."
+
+İstifadəçiyə kömək et və praktik məsləhətlər ver. Kod və texniki detallardan danışma.
 """
         
         # Prepare messages for OpenAI

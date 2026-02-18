@@ -826,12 +826,17 @@
         }
 
         .debt-negative {
-            color: rgb(0, 212, 0);
+            color: #22c55e; /* Yaşıl - mənfi borc (artıq ödəniş) */
             font-weight: 600;
         }
 
         .debt-positive {
-            color: var(--warning);
+            color: #dc2626; /* Qırmızı - müsbət borc */
+            font-weight: 600;
+        }
+
+        .debt-zero {
+            color: #eab308; /* Sarı - 0 borc */
             font-weight: 600;
         }
 
@@ -1600,6 +1605,18 @@
             font-size: 18px;
             font-weight: 700;
             font-family: 'Courier New', monospace;
+        }
+
+        .summary-value.debt {
+            color: #dc2626; /* Qırmızı - müsbət borc */
+        }
+
+        .summary-value.credit {
+            color: #22c55e; /* Yaşıl - mənfi borc (artıq ödəniş) */
+        }
+
+        .summary-value.zero {
+            color: #eab308; /* Sarı - 0 borc */
         }
 
         .summary-total {

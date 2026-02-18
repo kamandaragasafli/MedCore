@@ -23,7 +23,7 @@
                 {% for drug in drugs %}
                     <th class="drug-header">{{ drug.ad }}</th>
                 {% endfor %}
-                <th>Toplam Məbləğ</th>
+                <th>Toplam</th>
             </tr>
         </thead>
         <tbody>
@@ -31,7 +31,9 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td class="doctor-name">
-                        {{ row.doctor.ad }}
+                        <a href="{% url 'doctors:detail' row.doctor.id %}" style="color: inherit; text-decoration: none; cursor: pointer;">
+                            {{ row.doctor.ad }}
+                        </a>
                         {% if row.region %}
                             <small>{{ row.region.name }}</small>
                         {% endif %}
@@ -76,10 +78,6 @@
         <div class="summary-item">
             <div class="summary-value">{{ stats.total_quantity }}</div>
             <div class="summary-label">Dərman sayı</div>
-        </div>
-        <div class="summary-item">
-            <div class="summary-value">{{ stats.total_amount|floatformat:2 }} ₼</div>
-            <div class="summary-label">Ümumi Məbləğ</div>
         </div>
     </div>
 </div>

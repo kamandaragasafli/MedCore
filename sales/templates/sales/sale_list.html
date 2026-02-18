@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Satış qeydləri - MedAdmin{% endblock %}
+
+{% block active_sales %}active{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+    <div>
+        <h1 class="page-title" style="margin: 0; font-size: 24px;">Satış qeydləri</h1>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 14px;">Satışları redaktə etmək üçün "Redaktə et" düyməsinə basın</p>
+    </div>
+    <a href="{% url 'sales:add' %}" class="ghost-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; background: var(--primary); color: white; text-decoration: none; font-weight: 600;">
+        <i class="fas fa-plus"></i> Yeni satış
+    </a>
+</div>
+
+<form method="get" class="filter-section" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 24px;">
+    <div class="filter-group">
+        <label class="filter-label" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Bölgə</label>
+        <select name="region" class="filter-select" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; min-width: 180px;">
+            <option value="">Hamısı</option>
+            {% for region in regions %}
+                <option value="{{ region.id }}" {% if filters.region == region.id|stringformat:"s" %}selected{% endif %}>{{ region.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label class="filter-label" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Ay</label>
+        <select name="month" class="filter-select" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; min-width: 140px;">
+            <option value="">Hamısı</option>
+            {% for month_value, month_label in months %}
+                <option value="{{ month_value }}" {% if filters.month == month_value|stringformat:"s" %}selected{% endif %}>{{ month_label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn-search" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        <i class="fas fa-search"></i> Axtar
+    </button>
+    <a href="{% url 'sales:sale_list' %}" style="padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); color: var(--text); text-decoration: none; font-weight: 500;">Təmizlə</a>
+</form>
+
+<div class="table-container" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: var(--surface-muted);">
+                <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: 12px; color: var(--text-muted);">№</th>
+                <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: 12px; color: var(--text-muted);">Tarix</th>
+                <th style="padding: 12px 16px; text-align: left; font-weight: 600; font-size: 12px; color: var(--text-muted);">Bölgə</th>
+                <th style="padding: 12px 16px; text-align: right; font-weight: 600; font-size: 12px; color: var(--text-muted);">Məbləğ</th>
+                <th style="padding: 12px 16px; text-align: center; font-weight: 600; font-size: 12px; color: var(--text-muted);">Əməliyyat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 14px 16px; font-size: 14px;">{{ forloop.counter }}</td>
+                <td style="padding: 14px 16px; font-size: 14px;">{{ sale.date|date:"d.m.Y" }}</td>
+                <td style="padding: 14px 16px; font-size: 14px;">{{ sale.region.name }}</td>
+                <td style="padding: 14px 16px; font-size: 14px; text-align: right; font-weight: 600;">{{ sale.total_amount|floatformat:2 }} ₼</td>
+                <td style="padding: 14px 16px; text-align: center;">
+                    <a href="{% url 'sales:edit' sale.id %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; background: var(--primary); color: white; text-decoration: none; font-size: 13px; font-weight: 500;">
+                        <i class="fas fa-edit"></i> Redaktə et
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">Satış tapılmadı.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

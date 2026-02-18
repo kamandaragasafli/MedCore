@@ -35,14 +35,26 @@
 
         {% if import_type == 'debts' %}
         <div style="margin-top: 15px; font-size: 13px; color: #4b5563; background: #f9fafb; padding: 12px 15px; border-radius: 8px;">
-            <strong>Gözlənilən sütun adları:</strong>
+            <strong>Sütun sırası (mütləq belə olmalıdır):</strong>
             <ul style="margin: 8px 0 0 18px; list-style: disc;">
-                <li><code>Kod</code> (mütləq) — Həkim kodu</li>
-                <li><code>Əvvəlki Borc</code> — əvvəlki borc (optional)</li>
-                <li><code>Hesablanmış</code> — hesablanmış məbləğ (optional)</li>
-                <li><code>Silinən</code> — silinən məbləğ (optional)</li>
-                <li><code>Yekun Borc</code> — yekun borc (yalnız bu verilərsə, birbaşa yazılır)</li>
+                <li><strong>A sütunu</strong> — Bölgə (həkimin bölgə adı)</li>
+                <li><strong>B sütunu</strong> — Həkim adı</li>
+                <li><strong>C sütunu</strong> — Yekun borc (₼)</li>
             </ul>
+        </div>
+        {% elif import_type == 'doctors_full' %}
+        <div style="margin-top: 15px; font-size: 13px; color: #4b5563; background: #f9fafb; padding: 12px 15px; border-radius: 8px;">
+            <strong>Sütun sırası (cədvəl belə olmalıdır):</strong>
+            <ul style="margin: 8px 0 0 18px; list-style: disc;">
+                <li><strong>B sütunu</strong> — Bölgə</li>
+                <li><strong>C sütunu</strong> — Həkim adı</li>
+                <li><strong>D sütunu</strong> — İxtisas</li>
+                <li><strong>E sütunu</strong> — Dərəcə (I Dərəcə, II Dərəcə, III Dərəcə, VIP)</li>
+                <li><strong>F sütunu</strong> — Kategoriya (A, A*, B, C)</li>
+                <li><strong>G sütunu</strong> — Müəssisə (Klinika)</li>
+                <li><strong>I sütunu</strong> — Borcu (₼)</li>
+            </ul>
+            <p style="margin-top: 10px; color: #6b7280;">Sistemdə olmayan bölgə, ixtisas, klinika və həkimlər əlavə olunacaq; artıq mövcud olanlar ötürüləcək.</p>
         </div>
         {% elif import_type == 'drugs' %}
         <div style="margin-top: 15px; font-size: 13px; color: #4b5563; background: #f9fafb; padding: 12px 15px; border-radius: 8px;">
@@ -52,9 +64,6 @@
                 <li><code>Tam Ad</code></li>
                 <li><code>Qiymət</code> (mütləq)</li>
                 <li><code>Komissiya</code></li>
-                <li><code>Buraxılış Forması</code> (məs: Tablet, Kapsul və s.)</li>
-                <li><code>Dozaj</code></li>
-                <li><code>Barkod</code> (mövcuddursa unikal identifikator kimi istifadə olunur)</li>
             </ul>
         </div>
         {% endif %}

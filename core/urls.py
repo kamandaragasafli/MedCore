@@ -16,5 +16,11 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('settings/', views.settings, name='settings'),
     path('help/', views.help_support, name='help'),
+    
+    # Backup
+    path('settings/backup/', views.backup_settings, name='backup_settings'),
+    path('settings/backup/create/', views.create_backup, name='create_backup'),
+    path('settings/backup/<int:backup_id>/download/', views.download_backup, name='download_backup'),
+    path('settings/backup/<int:backup_id>/delete/', views.delete_backup, name='delete_backup'),
 ]
 

@@ -838,16 +838,220 @@ def export_company_debts_excel(request, company_id):
 
 @superuser_required
 @require_http_methods(["GET", "POST"])
+def import_company_doctors_full_excel(request, company_id):
+    """
+    Cədvəldən tam import: Bölgə, Həkim adı, İxtisas, Dərəcə, Kategoriya, Müəssisə, Borcu.
+    Sistemdə yoxdursa əlavə edir (bölgə, ixtisas, müəssisə, həkim); varsa əlavə etmir.
+    Sütunlar: B=Bölgə, C=Həkim adı, D=İxtisas, E=Dərəcə, F=Kategoriya, G=Müəssisə, I=Borcu.
+    """
+    company = get_object_or_404(Company, id=company_id)
+    if not company.db_name:
+        messages.error(request, "Bu şirkətin verilənlər bazası yoxdur.")
+        return redirect("master_admin:company_detail", company_id=company_id)
+
+    if request.method == "GET":
+        return render(
+            request,
+            "master_admin/import_excel.html",
+            {
+                "company": company,
+                "import_type": "doctors_full",
+                "title": "Həkimlər cədvəlini Excel-dən Import",
+                "description": "Bölgə, həkim adları, ixtisas, dərəcə, kategoriya, müəssisə və borcu olan cədvəli yükləyin. Sistemdə olmayanlar əlavə olunacaq.",
+            },
+        )
+
+    upload = request.FILES.get("file")
+    if not upload:
+        messages.error(request, "Zəhmət olmasa Excel faylı seçin.")
+        return redirect("master_admin:import_company_doctors_full", company_id=company_id)
+    if not (upload.name.endswith(".xlsx") or upload.name.endswith(".xlsm")):
+        messages.error(request, "Yalnız .xlsx və ya .xlsm formatlı Excel faylları dəstəklənir.")
+        return redirect("master_admin:import_company_doctors_full", company_id=company_id)
+
+    from subscription.db_router import set_tenant_db, clear_tenant_db
+    from doctors.models import Doctor
+    from regions.models import Region, City, Clinic, Specialization
+    from decimal import Decimal, InvalidOperation
+
+    # Sütunlar: B=2, C=3, D=4, E=5, F=6, G=7, I=9
+    COL_BOLGE = 2
+    COL_HEKIM = 3
+    COL_IXTISAS = 4
+    COL_DERECE = 5
+    COL_KATEQORIYA = 6
+    COL_MUESSISE = 7
+    COL_BORCU = 9
+
+    def to_decimal(val):
+        if val is None or val == "":
+            return Decimal("0")
+        try:
+            return Decimal(str(val))
+        except (InvalidOperation, ValueError):
+            return Decimal("0")
+
+    def norm_degree(val):
+        if not val:
+            return "I"
+        s = str(val).strip().upper()
+        if "VIP" in s:
+            return "VIP"
+        if "III" in s:
+            return "III"
+        if "II" in s:
+            return "II"
+        if "I" in s:
+            return "I"
+        return "I"
+
+    def norm_category(val):
+        if not val:
+            return "A"
+        s = str(val).strip().upper().replace(" ", "")
+        for code in ["A*", "A", "B", "C"]:
+            if code in s or s == code:
+                return code
+        return "A"
+
+    regions_created = 0
+    specializations_created = 0
+    clinics_created = 0
+    doctors_created = 0
+    skipped = 0
+
+    try:
+        wb = load_workbook(upload, data_only=True)
+        ws = wb.active
+        set_tenant_db(company.db_name)
+        # Başlıq 1-ci və ya 2-ci sətirdə ola bilər; məlumat 2-ci sətirdən başlayır
+        start_row = 2
+        for row in range(start_row, ws.max_row + 1):
+            bolge_name = ws.cell(row=row, column=COL_BOLGE).value
+            hekim_ad = ws.cell(row=row, column=COL_HEKIM).value
+            if not bolge_name or not hekim_ad:
+                skipped += 1
+                continue
+            bolge_name = str(bolge_name).strip()
+            hekim_ad = str(hekim_ad).strip()
+            # Başlıq sətirini atla
+            if hekim_ad.lower() in ("həkim adı", "hekim adi", "həkim adi") or bolge_name.lower() == "bölgə":
+                skipped += 1
+                continue
+            if not bolge_name or not hekim_ad:
+                skipped += 1
+                continue
+
+            # Bölgə — yoxdursa əlavə et
+            region = Region.objects.filter(name__iexact=bolge_name).first()
+            if not region:
+                region = Region.objects.create(name=bolge_name)
+                regions_created += 1
+
+            # Şəhər (klinika üçün lazımdır) — bölgə üçün default bir şəhər
+            default_city = City.objects.filter(region=region).first()
+            if not default_city:
+                default_city = City.objects.create(region=region, name=region.name)
+
+            # İxtisas — yoxdursa əlavə et
+            ixtisas_name = ws.cell(row=row, column=COL_IXTISAS).value
+            ixtisas_name = str(ixtisas_name).strip() if ixtisas_name else ""
+            if not ixtisas_name:
+                ixtisas_name = "—"
+            ixtisas = Specialization.objects.filter(name__iexact=ixtisas_name).first()
+            if not ixtisas:
+                ixtisas = Specialization.objects.create(name=ixtisas_name)
+                specializations_created += 1
+
+            # Müəssisə (Klinika) — yoxdursa əlavə et
+            muessise = ws.cell(row=row, column=COL_MUESSISE).value
+            muessise = str(muessise).strip() if muessise else ""
+            clinic = None
+            if muessise:
+                clinic = Clinic.objects.filter(region=region, name__iexact=muessise).first()
+                if not clinic:
+                    clinic = Clinic.objects.create(
+                        name=muessise,
+                        region=region,
+                        city=default_city,
+                        address="",
+                    )
+                    clinics_created += 1
+
+            # Həkim — yalnız yoxdursa əlavə et (ad + bölgə ilə yoxla)
+            existing = Doctor.objects.filter(ad__iexact=hekim_ad, region=region).first()
+            if existing:
+                skipped += 1
+                continue
+
+            degree_code = norm_degree(ws.cell(row=row, column=COL_DERECE).value)
+            category_code = norm_category(ws.cell(row=row, column=COL_KATEQORIYA).value)
+            borc = to_decimal(ws.cell(row=row, column=COL_BORCU).value)
+
+            Doctor.objects.create(
+                ad=hekim_ad,
+                region=region,
+                city=default_city,
+                clinic=clinic,
+                ixtisas=ixtisas,
+                degree=degree_code,
+                category=category_code,
+                telefon="-",
+                evvelki_borc=borc,
+                hesablanmish_miqdar=Decimal("0"),
+                silinen_miqdar=Decimal("0"),
+            )
+            doctors_created += 1
+
+        messages.success(
+            request,
+            f"Import tamamlandı: {regions_created} bölgə, {specializations_created} ixtisas, "
+            f"{clinics_created} klinika, {doctors_created} həkim əlavə olundu; {skipped} sətir (artıq mövcud) ötürüldü.",
+        )
+        return redirect("master_admin:company_detail", company_id=company_id)
+    except Exception as e:
+        messages.error(request, f"Import xətası: {str(e)}")
+        return redirect("master_admin:import_company_doctors_full", company_id=company_id)
+    finally:
+        clear_tenant_db()
+
+
+@superuser_required
+@require_http_methods(["POST"])
+def zero_company_doctors_debts(request, company_id):
+    """Bütün həkimlərin yalnız Əvvəlki borcunu 0 et (yekun borc yenidən hesablanacaq)."""
+    company = get_object_or_404(Company, id=company_id)
+    if not company.db_name:
+        messages.error(request, "Bu şirkətin verilənlər bazası yoxdur.")
+        return redirect("master_admin:company_detail", company_id=company_id)
+
+    from subscription.db_router import set_tenant_db, clear_tenant_db
+    from doctors.models import Doctor
+    from decimal import Decimal
+
+    try:
+        set_tenant_db(company.db_name)
+        doctors = Doctor.objects.all()
+        count = 0
+        for doctor in doctors:
+            doctor.evvelki_borc = Decimal("0")
+            doctor.save()
+            count += 1
+        messages.success(request, f"Həkimlərin əvvəlki borcları sıfırlandı. Cəmi {count} həkim yeniləndi.")
+    except Exception as e:
+        messages.error(request, f"Borclar sıfırlanarkən xəta: {str(e)}")
+    finally:
+        clear_tenant_db()
+    return redirect("master_admin:company_detail", company_id=company_id)
+
+
+@superuser_required
+@require_http_methods(["GET", "POST"])
 def import_company_debts_excel(request, company_id):
     """
     Import/update doctor debts from Excel file for a specific company.
     
-    Expected columns (header row, in any order):
-    - Kod               -> doctor.code (required)
-    - Əvvəlki Borc      -> evvelki_borc  (optional)
-    - Hesablanmış       -> hesablanmish_miqdar (optional)
-    - Silinən           -> silinen_miqdar (optional)
-    If only Yekun Borc is provided, it will be set directly.
+    Gözlənilən sütunlar: Bölgə, Həkim adı, Yekun borc
     """
     company = get_object_or_404(Company, id=company_id)
 
@@ -863,7 +1067,7 @@ def import_company_debts_excel(request, company_id):
                 "company": company,
                 "import_type": "debts",
                 "title": "Borcları Excel-dən Import",
-                "description": "Həkim kodu və borc məlumatlarını ehtiva edən Excel faylını yükləyin.",
+                "description": "Bölgə, Həkim adı və Yekun borc sütunlarını ehtiva edən Excel faylını yükləyin.",
             },
         )
 
@@ -879,97 +1083,63 @@ def import_company_debts_excel(request, company_id):
 
     from subscription.db_router import set_tenant_db, clear_tenant_db
     from doctors.models import Doctor
+    from regions.models import Region
     from decimal import Decimal, InvalidOperation
 
     updated = 0
-    created = 0
     skipped = 0
 
     try:
         wb = load_workbook(upload, data_only=True)
         ws = wb.active
 
-        # Build header map
-        header_row = 1
-        headers = {}
-        for col in range(1, ws.max_column + 1):
-            value = ws.cell(row=header_row, column=col).value
-            if not value:
-                continue
-            header_text = str(value).strip().lower()
-            headers[header_text] = col
+        # A = Bölgə, B = Həkim adı, C = Yekun borc (sütun mövqeyinə görə)
+        col_bolge = 1   # A
+        col_hekim = 2   # B
+        col_yekun = 3   # C
+        header_row = 1  # Birinci sətir başlıq ola bilər, məlumat 2-ci sətirdən
 
-        # Required column: Kod
-        if "kod" not in headers:
-            messages.error(request, 'Sütun tapılmadı: "Kod". Zəhmət olmasa şablona uyğun fayl yükləyin.')
-            return redirect("master_admin:import_company_debts", company_id=company_id)
-
-        col_kod = headers["kod"]
-        col_prev = headers.get("əvvəlki borc")
-        col_calc = headers.get("hesablanmış")
-        col_del = headers.get("silinən")
-        col_final = headers.get("yekun borc")
-
-        # Switch to tenant DB
         set_tenant_db(company.db_name)
 
-        # Process rows
-        for row in range(header_row + 1, ws.max_row + 1):
-            code = ws.cell(row=row, column=col_kod).value
-            if not code:
-                skipped += 1
-                continue
-            code = str(code).strip()
-            if not code:
-                skipped += 1
-                continue
-
+        def to_decimal(val):
+            if val is None or val == "":
+                return None
             try:
-                doctor = Doctor.objects.get(code=code)
-            except Doctor.DoesNotExist:
+                return Decimal(str(val))
+            except (InvalidOperation, ValueError):
+                return None
+
+        for row in range(header_row + 1, ws.max_row + 1):
+            bolge_name = ws.cell(row=row, column=col_bolge).value
+            hekim_ad = ws.cell(row=row, column=col_hekim).value
+            yekun_val = to_decimal(ws.cell(row=row, column=col_yekun).value)
+
+            if not bolge_name or not hekim_ad:
+                skipped += 1
+                continue
+            bolge_name = str(bolge_name).strip()
+            hekim_ad = str(hekim_ad).strip()
+            if not bolge_name or not hekim_ad:
+                skipped += 1
+                continue
+            if yekun_val is None:
+                yekun_val = Decimal("0")
+
+            region = Region.objects.filter(name__iexact=bolge_name).first()
+            if not region:
                 skipped += 1
                 continue
 
-            changed = False
-
-            def to_decimal(val):
-                if val is None or val == "":
-                    return None
-                try:
-                    return Decimal(str(val))
-                except (InvalidOperation, ValueError):
-                    return None
-
-            if col_prev:
-                v = to_decimal(ws.cell(row=row, column=col_prev).value)
-                if v is not None:
-                    doctor.evvelki_borc = v
-                    changed = True
-
-            if col_calc:
-                v = to_decimal(ws.cell(row=row, column=col_calc).value)
-                if v is not None:
-                    doctor.hesablanmish_miqdar = v
-                    changed = True
-
-            if col_del:
-                v = to_decimal(ws.cell(row=row, column=col_del).value)
-                if v is not None:
-                    doctor.silinen_miqdar = v
-                    changed = True
-
-            if col_final and not changed:
-                # If only final debt provided, set it directly
-                v = to_decimal(ws.cell(row=row, column=col_final).value)
-                if v is not None:
-                    doctor.yekun_borc = v
-                    changed = True
-
-            if changed:
-                doctor.save()
-                updated += 1
-            else:
+            doctor = Doctor.objects.filter(ad__iexact=hekim_ad, region=region).first()
+            if not doctor:
                 skipped += 1
+                continue
+
+            doctor.evvelki_borc = yekun_val
+            doctor.hesablanmish_miqdar = Decimal("0")
+            doctor.silinen_miqdar = Decimal("0")
+            doctor.save()
+            updated += 1
 
         messages.success(
             request,
@@ -991,13 +1161,10 @@ def import_company_drugs_excel(request, company_id):
     Import/add/update drugs from Excel file for a specific company.
     
     Expected columns (header row, in any order):
-    - Ad                 -> ad
-    - Tam Ad             -> tam_ad (optional)
-    - Qiymət             -> qiymet
-    - Komissiya          -> komissiya
-    - Buraxılış Forması  -> buraxilis_formasi (matches display name or internal code)
-    - Dozaj              -> dozaj (optional)
-    - Barkod             -> barkod (used as unique identifier if present)
+    - Ad        -> ad (required)
+    - Tam Ad    -> tam_ad (optional)
+    - Qiymət    -> qiymet (required)
+    - Komissiya -> komissiya (optional, default 0)
     """
     company = get_object_or_404(Company, id=company_id)
 
@@ -1060,9 +1227,6 @@ def import_company_drugs_excel(request, company_id):
         col_tam_ad = headers.get("tam ad")
         col_price = headers["qiymət"]
         col_comm = headers.get("komissiya")
-        col_form = headers.get("buraxılış forması")
-        col_dozaj = headers.get("dozaj")
-        col_barcode = headers.get("barkod")
 
         set_tenant_db(company.db_name)
 
@@ -1073,9 +1237,6 @@ def import_company_drugs_excel(request, company_id):
                 return Decimal(str(val))
             except (InvalidOperation, ValueError):
                 return None
-
-        # Map display names of release forms to internal codes
-        form_map = {label.lower(): code for code, label in getattr(Drug, "RELEASE_FORM_CHOICES", [])}
 
         for row in range(header_row + 1, ws.max_row + 1):
             name = ws.cell(row=row, column=col_ad).value
@@ -1107,65 +1268,25 @@ def import_company_drugs_excel(request, company_id):
             if komissiya is None:
                 komissiya = Decimal("0")
 
-            form_code = "tablet"
-            if col_form:
-                raw_form = ws.cell(row=row, column=col_form).value
-                if raw_form:
-                    raw_form = str(raw_form).strip().lower()
-                    # Try match by display label first
-                    if raw_form in form_map:
-                        form_code = form_map[raw_form]
-                    else:
-                        # Fallback: if they provided internal code
-                        internal = raw_form
-                        valid_codes = {code for code, _ in getattr(Drug, "RELEASE_FORM_CHOICES", [])}
-                        if internal in valid_codes:
-                            form_code = internal
-
-            dozaj = (
-                str(ws.cell(row=row, column=col_dozaj).value).strip()
-                if col_dozaj
-                and ws.cell(row=row, column=col_dozaj).value is not None
-                else ""
-            )
-
-            barcode = (
-                str(ws.cell(row=row, column=col_barcode).value).strip()
-                if col_barcode
-                and ws.cell(row=row, column=col_barcode).value is not None
-                else None
-            )
-
-            # Find existing drug
-            drug = None
-            if barcode:
-                drug = Drug.objects.filter(barkod=barcode).first()
-            if not drug:
-                drug = Drug.objects.filter(ad=name).first()
+            # Mövcud dərmanı ad üzrə tap
+            drug = Drug.objects.filter(ad=name).first()
 
             if drug:
-                # Update existing
+                # Yenilə
                 drug.ad = name
                 drug.tam_ad = tam_ad or name
                 drug.qiymet = price
                 drug.komissiya = komissiya
-                drug.buraxilis_formasi = form_code
-                drug.dozaj = dozaj
-                if barcode:
-                    drug.barkod = barcode
                 drug.is_active = True
                 drug.save()
                 updated += 1
             else:
-                # Create new
+                # Yeni yarat (buraxılış forması, dozaj, barkod default/boş)
                 drug = Drug.objects.create(
                     ad=name,
                     tam_ad=tam_ad or name,
                     qiymet=price,
                     komissiya=komissiya,
-                    buraxilis_formasi=form_code,
-                    dozaj=dozaj or None,
-                    barkod=barcode or None,
                     is_active=True,
                 )
                 created += 1

@@ -16,7 +16,9 @@ from subscription.decorators import subscription_required
 from doctors.models import Doctor, DoctorPayment
 from drugs.models import Drug
 from regions.models import Region 
-from .models import Prescription, PrescriptionItem  
+from .models import Prescription, PrescriptionItem
+from reports.models import MonthlyDoctorReport
+from datetime import date  
 
 
 @login_required
@@ -61,6 +63,32 @@ def add_prescription(request):
                 # Get doctor
                 doctor = Doctor.objects.get(id=doctor_id)
                 region = Region.objects.get(id=region_id)
+                
+                # Validate date against last closed report
+                prescription_date = datetime.strptime(date, '%Y-%m-%d').date()
+                last_report = MonthlyDoctorReport.objects.filter(
+                    region_id=region_id
+                ).order_by('-year', '-month').first()
+                
+                if last_report:
+                    # Calculate the next month after last closed report
+                    last_closed_date = date(last_report.year, last_report.month, 1)
+                    # Get first day of next month
+                    if last_report.month == 12:
+                        next_month_date = date(last_report.year + 1, 1, 1)
+                    else:
+                        next_month_date = date(last_report.year, last_report.month + 1, 1)
+                    
+                    # Check if prescription date is before the allowed month
+                    prescription_month_start = date(prescription_date.year, prescription_date.month, 1)
+                    
+                    if prescription_month_start < next_month_date:
+                        messages.error(
+                            request, 
+                            f'Bu bölgə üçün ən son bağlanan hesabat {last_report.month:02d}/{last_report.year} ayıdır. '
+                            f'Qeydiyyat yalnız {next_month_date.month:02d}/{next_month_date.year} ayından başlayaraq əlavə edilə bilər.'
+                        )
+                        return redirect('prescriptions:add')
                 
                 # Create prescription
                 prescription = Prescription.objects.create(
@@ -256,6 +284,36 @@ def doctors_by_region(request, region_id):
         for doctor in doctors
     ]
     return JsonResponse({'doctors': data})
+
+
+@login_required
+@subscription_required
+def get_last_closed_report(request, region_id):
+    """Get the last closed monthly report for a region"""
+    try:
+        # Find the most recent closed report for this region
+        last_report = MonthlyDoctorReport.objects.filter(
+            region_id=region_id
+        ).order_by('-year', '-month').first()
+        
+        if last_report:
+            return JsonResponse({
+                'last_closed_year': last_report.year,
+                'last_closed_month': last_report.month,
+                'has_closed_report': True
+            })
+        else:
+            # No closed reports for this region - allow all dates
+            return JsonResponse({
+                'last_closed_year': None,
+                'last_closed_month': None,
+                'has_closed_report': False
+            })
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'has_closed_report': False
+        }, status=500)
 
 @login_required
 @subscription_required

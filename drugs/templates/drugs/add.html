@@ -12,7 +12,7 @@
             <i class="fas fa-arrow-left"></i> Dərmanlar
         </a>
         <h1>Yeni Dərman Əlavə Et</h1>
-        <p>Dərman məlumatlarını daxil edin</p>
+        <p>Ad, tam ad, komissiya və qiymət daxil edin</p>
     </div>
 </div>
 
@@ -37,93 +37,30 @@
         <div class="form-section">
             <h3><i class="fas fa-pills"></i> Əsas Məlumatlar</h3>
             
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="ad">Ad <span class="required">*</span></label>
-                    <input type="text" id="ad" name="ad" class="form-control" required placeholder="Məsələn: Paracetamol">
-                </div>
-                
-                <div class="form-group">
-                    <label for="buraxilis_formasi">Buraxılış Forması <span class="required">*</span></label>
-                    <select id="buraxilis_formasi" name="buraxilis_formasi" class="form-control" required>
-                        {% for value, label in release_forms %}
-                        <option value="{{ value }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="ad">Ad <span class="required">*</span></label>
+                <input type="text" id="ad" name="ad" class="form-control" required placeholder="Məsələn: Paracetamol">
             </div>
             
             <div class="form-group">
                 <label for="tam_ad">Tam Ad <span class="required">*</span></label>
                 <input type="text" id="tam_ad" name="tam_ad" class="form-control" required placeholder="Dərmanın tam adı">
             </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="dozaj">Dozaj</label>
-                    <input type="text" id="dozaj" name="dozaj" class="form-control" placeholder="Məsələn: 500mg, 10ml">
-                </div>
-                
-                <div class="form-group">
-                    <label for="barkod">Barkod</label>
-                    <input type="text" id="barkod" name="barkod" class="form-control" placeholder="Barkod nömrəsi">
-                </div>
-            </div>
         </div>
         
         <div class="form-section">
-            <h3><i class="fas fa-money-bill-wave"></i> Qiymət Məlumatları</h3>
+            <h3><i class="fas fa-money-bill-wave"></i> Qiymət və Komissiya</h3>
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="qiymet">Qiymət (AZN) <span class="required">*</span></label>
+                    <label for="qiymet">Qiymət (₼) <span class="required">*</span></label>
                     <input type="number" id="qiymet" name="qiymet" class="form-control" required step="0.01" min="0" placeholder="0.00">
                 </div>
                 
                 <div class="form-group">
-                    <label for="komissiya">Komissiya (%) <span class="required">*</span></label>
-                    <input type="number" id="komissiya" name="komissiya" class="form-control" required step="0.01" min="0" max="100" placeholder="0.00">
+                    <label for="komissiya">Komissiya (₼) <span class="required">*</span></label>
+                    <input type="number" id="komissiya" name="komissiya" class="form-control" required step="0.01" min="0" placeholder="0.00">
                 </div>
-            </div>
-            
-            <div class="price-preview">
-                <div class="price-item">
-                    <span class="price-label">Əsas Qiymət:</span>
-                    <span class="price-value" id="base-price">0.00 ₼</span>
-                </div>
-                <div class="price-item">
-                    <span class="price-label">Komissiya:</span>
-                    <span class="price-value" id="commission-amount">0.00 ₼</span>
-                </div>
-                <div class="price-item highlight">
-                    <span class="price-label">Yekun Qiymət:</span>
-                    <span class="price-value" id="final-price">0.00 ₼</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-section">
-            <h3><i class="fas fa-industry"></i> İstehsalçı Məlumatları</h3>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="istehsalci">İstehsalçı</label>
-                    <input type="text" id="istehsalci" name="istehsalci" class="form-control" placeholder="Şirkət adı">
-                </div>
-                
-                <div class="form-group">
-                    <label for="olke">Ölkə</label>
-                    <input type="text" id="olke" name="olke" class="form-control" placeholder="İstehsal ölkəsi">
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-section">
-            <h3><i class="fas fa-sticky-note"></i> Əlavə Məlumat</h3>
-            
-            <div class="form-group">
-                <label for="qeyd">Qeyd</label>
-                <textarea id="qeyd" name="qeyd" class="form-control" rows="4" placeholder="Əlavə qeydlər"></textarea>
             </div>
         </div>
         
@@ -231,63 +168,6 @@
 
 .form-control::placeholder {
     color: var(--text-muted);
-}
-
-select.form-control {
-    cursor: pointer;
-}
-
-textarea.form-control {
-    resize: vertical;
-    min-height: 100px;
-}
-
-.price-preview {
-    background: var(--surface-muted);
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-.price-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.price-item:last-child {
-    border-bottom: none;
-}
-
-.price-item.highlight {
-    background: var(--surface);
-    margin: 0 -20px -20px -20px;
-    padding: 16px 20px;
-    border-radius: 0 0 12px 12px;
-    border-top: 2px solid var(--primary);
-}
-
-.price-label {
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
-.price-value {
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--text);
-}
-
-.price-item.highlight .price-label {
-    font-weight: 600;
-    color: var(--text);
-}
-
-.price-item.highlight .price-value {
-    font-size: 24px;
-    color: var(--primary);
 }
 
 .form-actions {
@@ -405,22 +285,4 @@ textarea.form-control {
 }
 </style>
 
-<script>
-// Calculate price preview
-document.getElementById('qiymet').addEventListener('input', calculatePrice);
-document.getElementById('komissiya').addEventListener('input', calculatePrice);
-
-function calculatePrice() {
-    const price = parseFloat(document.getElementById('qiymet').value) || 0;
-    const commission = parseFloat(document.getElementById('komissiya').value) || 0;
-    
-    const commissionAmount = (price * commission) / 100;
-    const finalPrice = price + commissionAmount;
-    
-    document.getElementById('base-price').textContent = price.toFixed(2) + ' ₼';
-    document.getElementById('commission-amount').textContent = commissionAmount.toFixed(2) + ' ₼';
-    document.getElementById('final-price').textContent = finalPrice.toFixed(2) + ' ₼';
-}
-</script>
 {% endblock %}
-

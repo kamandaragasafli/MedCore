@@ -21,20 +21,25 @@ def add_region(request):
     """Add a new region"""
     if request.method == 'POST':
         name = request.POST.get('name')
-        code = request.POST.get('code')
+        code = request.POST.get('code', '').strip()  # Optional code
         
-        if name and code:
+        if name:
             try:
-                Region.objects.create(
-                    name=name,
-                    code=code
-                )
+                # If code is provided, check if it's unique
+                if code:
+                    if Region.objects.filter(code=code).exists():
+                        messages.error(request, 'Bu kod artıq istifadə olunub. Zəhmət olmasa başqa kod seçin.')
+                        return render(request, 'regions/add.html', {'name': name, 'code': code})
+                    Region.objects.create(name=name, code=code)
+                else:
+                    # Code will be auto-generated in model's save method
+                    Region.objects.create(name=name)
                 messages.success(request, 'Bölgə uğurla əlavə edildi!')
                 return redirect('regions:list')
             except Exception as e:
                 messages.error(request, f'Xəta: {str(e)}')
         else:
-            messages.error(request, 'Zəhmət olmasa bütün məcburi sahələri doldurun!')
+            messages.error(request, 'Zəhmət olmasa bölgə adını doldurun!')
     
     return render(request, 'regions/add.html')
 
@@ -88,11 +93,11 @@ def add_clinic(request):
         name = request.POST.get('name')
         region_id = request.POST.get('region')
         city_id = request.POST.get('city')
-        address = request.POST.get('address')
+        address = request.POST.get('address', '').strip() or None
         phone = request.POST.get('phone', '')
         clinic_type = request.POST.get('type', 'clinic')
         
-        if name and region_id and city_id and address:
+        if name and region_id and city_id:
             try:
                 Clinic.objects.create(
                     name=name,

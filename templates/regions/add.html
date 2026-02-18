@@ -6,6 +6,25 @@
 {% block active_regions %}active{% endblock %}
 
 {% block content %}
+<style>
+.alert {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+}
+.alert-success {
+    background: #dcfce7;
+    color: #15803d;
+}
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+</style>
 <div class="main-content">
     <div class="page-header">
         <div>
@@ -24,7 +43,7 @@
     <!-- Messages -->
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" style="margin-bottom: 20px; padding: 15px; border-radius: 8px; background: {% if message.tags == 'success' %}#dcfce7{% elif message.tags == 'error' %}#fee2e2{% else %}#dbeafe{% endif %}; color: {% if message.tags == 'success' %}#15803d{% elif message.tags == 'error' %}#991b1b{% else %}#1e40af{% endif %};">
+            <div class="alert alert-{{ message.tags }}">
                 {{ message }}
             </div>
         {% endfor %}
@@ -52,18 +71,18 @@
 
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label class="form-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text);">
-                        Bölgə Kodu <span style="color: #ef4444;">*</span>
+                        Bölgə Kodu <span style="color: var(--text-muted); font-size: 12px;">(İstəyə bağlı)</span>
                     </label>
                     <input 
                         type="text" 
                         name="code" 
                         class="form-input" 
-                        placeholder="Məsələn: BAK, GAN, SMQ"
-                        required
+                        placeholder="Məsələn: BAK, GAN, SMQ (boş buraxsanız avtomatik yaradılacaq)"
+                        maxlength="10"
                         style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text); font-size: 14px;"
                     >
                     <small style="display: block; margin-top: 6px; color: var(--text-muted); font-size: 12px;">
-                        Unikal kod (maksimum 10 simvol)
+                        Unikal kod (maksimum 10 simvol). Boş buraxsanız, bölgə adından və ya təsadüfi kod avtomatik yaradılacaq.
                     </small>
                 </div>
 

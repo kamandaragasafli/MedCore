@@ -172,7 +172,6 @@ button:active, a:active {
     border-radius: 14px;
     overflow: hidden;
     flex-shrink: 0;
-    border: 2px solid var(--border);
 }
 
 .brand-logo img {
@@ -325,6 +324,8 @@ button:active, a:active {
     top: 24px;
     z-index: 5;
     gap: 16px;
+    min-width: 0;
+    overflow: visible;
 }
 
 .topbar-left {
@@ -374,6 +375,8 @@ button:active, a:active {
     align-items: center;
     gap: 12px;
     flex-wrap: nowrap;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .topbar-action-buttons {
@@ -382,7 +385,9 @@ button:active, a:active {
     gap: 12px;
     margin-right: 20px;
     flex-wrap: nowrap;
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .action-btn {
@@ -398,6 +403,15 @@ button:active, a:active {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.action-btn .btn-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .action-btn:hover {
@@ -463,6 +477,7 @@ button:active, a:active {
     display: grid;
     place-items: center;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 .topbar-icon:hover {
@@ -495,6 +510,7 @@ button:active, a:active {
 /* User Menu Dropdown */
 .user-menu-wrapper {
     position: relative;
+    flex-shrink: 0;
 }
 
 .user-menu {
@@ -2302,6 +2318,44 @@ button:active, a:active {
 
     .header-actions {
         gap: 8px;
+    }
+}
+
+/* Medium Screens (1024px - 1400px) */
+@media (max-width: 1400px) and (min-width: 1024px) {
+    .topbar {
+        padding: 14px 18px;
+    }
+    
+    .topbar-action-buttons {
+        gap: 8px;
+        margin-right: 12px;
+    }
+    
+    .action-btn {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+    
+    .action-btn .btn-text {
+        font-size: 12px;
+    }
+}
+
+/* Tablet Devices (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .topbar-action-buttons {
+        gap: 6px;
+        margin-right: 8px;
+    }
+    
+    .action-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .action-btn .btn-text {
+        font-size: 11px;
     }
 }
 

@@ -4,13 +4,22 @@ from decouple import config, Csv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env from project root so OPENAI_API_KEY and others are available
+import os
+_env_file = BASE_DIR / '.env'
+if _env_file.exists():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(_env_file)
+    except ImportError:
+        pass  # python-dotenv not installed; decouple will still read .env from CWD
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Use environment variable or set in production settings
-import os
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-key-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -68,6 +77,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'subscription.context_processors.notifications',
+                'core.context_processors.system_branding',  # System branding (name, logo)
             ],
         },
     },
@@ -78,14 +88,34 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# Local: SQLite (default). Production: set DJANGO_SETTINGS_MODULE=config.settings_production → PostgreSQL
 
 # Master database for subscriptions, users, auth
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+USE_POSTGRESQL = config('USE_POSTGRESQL', default=False, cast=bool)
+
+if USE_POSTGRESQL:
+    # PostgreSQL for production
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='medadmin'),
+            'USER': config('DB_USER', default='medadmin_user'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+            'OPTIONS': {
+                'connect_timeout': 10,
+            },
+        }
     }
-}
+else:
+    # SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Tenant databases will be added dynamically at runtime
 
@@ -174,4 +204,10 @@ if not DEBUG:
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-3.5-turbo')  # OpenAI model to use (gpt-3.5-turbo, gpt-4, etc.)
 CHATBOT_API_KEY = config('CHATBOT_API_KEY', default='20251129')  # API key for securing chatbot query endpoint
+
+# System Branding Configuration
+SYSTEM_NAME = config('SYSTEM_NAME', default='MedCore')
+SYSTEM_SUBTITLE = config('SYSTEM_SUBTITLE', default='')
+SYSTEM_LOGO = config('SYSTEM_LOGO', default='img/icon.png')  # Path to logo in static folder
+SYSTEM_FAVICON = config('SYSTEM_FAVICON', default='img/icon.png')  # Path to favicon in static folder
 

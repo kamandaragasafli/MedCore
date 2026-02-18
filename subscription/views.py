@@ -23,37 +23,39 @@ def subscription_plans(request):
 
 @transaction.atomic
 def register_company(request):
-    """Company registration with plan selection"""
+    """Company registration with simplified form - requires plan selection first"""
     if request.method == 'POST':
         # Get form data
         company_name = request.POST.get('company_name')
-        company_email = request.POST.get('company_email')
         company_phone = request.POST.get('company_phone', '')
-        
-        # User data
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
         username = request.POST.get('username')
-        email = request.POST.get('email')
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
-        
-        # Plan selection
-        plan_id = request.POST.get('plan_id')
-        billing_cycle = request.POST.get('billing_cycle', 'monthly')
+        plan_id = request.POST.get('plan_id') or request.GET.get('plan')
         
         # Validation
+        if not company_name or not company_phone or not username or not password or not password_confirm:
+            messages.error(request, 'Bütün sahələr doldurulmalıdır!')
+            return redirect('subscription:register')
+        
         if password != password_confirm:
-            messages.error(request, 'Passwords do not match!')
+            messages.error(request, 'Parollar uyğun gəlmir!')
             return redirect('subscription:register')
         
         if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username already exists!')
+            messages.error(request, 'İstifadəçi adı artıq mövcuddur!')
             return redirect('subscription:register')
         
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email already exists!')
-            return redirect('subscription:register')
+        if not plan_id:
+            messages.error(request, 'Paket seçilməyib! Zəhmət olmasa paket seçin.')
+            return redirect('subscription:plans')
+        
+        try:
+            # Get selected plan
+            plan = SubscriptionPlan.objects.get(id=plan_id, is_active=True)
+        except SubscriptionPlan.DoesNotExist:
+            messages.error(request, 'Seçilmiş paket tapılmadı!')
+            return redirect('subscription:plans')
         
         try:
             # Create Company
@@ -68,11 +70,14 @@ def register_company(request):
             # Generate unique database name
             db_name = generate_db_name(slug)
             
+            # Use username as email if no email provided
+            email = f"{username}@medadmin.local"
+            
             company = Company.objects.create(
                 name=company_name,
                 slug=slug,
                 db_name=db_name,
-                email=company_email,
+                email=email,
                 phone=company_phone,
                 is_active=True
             )
@@ -85,8 +90,8 @@ def register_company(request):
                 username=username,
                 email=email,
                 password=password,
-                first_name=first_name,
-                last_name=last_name,
+                first_name='',
+                last_name='',
                 # Company owners should NOT access Django admin directly.
                 # Only superadmins (master admin) can use the admin panel.
                 is_staff=False
@@ -101,21 +106,14 @@ def register_company(request):
                 is_active=True
             )
             
-            # Create Subscription (Requires Payment - No Free Trial)
-            plan = SubscriptionPlan.objects.get(id=plan_id)
-            
-            if billing_cycle == 'monthly':
-                amount = plan.price_monthly
-            else:
-                amount = plan.price_yearly
-            
+            # Create Subscription with selected plan
             subscription = Subscription.objects.create(
                 company=company,
                 plan=plan,
-                status='active',  # Changed from 'trial' to 'active' - requires payment
-                billing_cycle=billing_cycle,
+                status='pending',  # Pending until contract is agreed
+                billing_cycle='monthly',
                 start_date=timezone.now(),
-                amount=amount,
+                amount=plan.price_monthly,
                 auto_renew=True
             )
             
@@ -128,21 +126,30 @@ def register_company(request):
             # Log the user in
             login(request, user)
             
-            # Redirect to contract agreement page instead of dashboard
+            # Redirect to contract agreement page (təsdiqləmə)
             return redirect('subscription:contract')
             
-        except SubscriptionPlan.DoesNotExist:
-            messages.error(request, 'Invalid subscription plan selected!')
-            return redirect('subscription:register')
         except Exception as e:
-            messages.error(request, f'An error occurred: {str(e)}')
+            messages.error(request, f'Xəta baş verdi: {str(e)}')
             return redirect('subscription:register')
     
     # GET request - show registration form
-    plans = SubscriptionPlan.objects.filter(is_active=True).order_by('price_monthly')
+    plan_id = request.GET.get('plan')
+    plan = None
+    if plan_id:
+        try:
+            plan = SubscriptionPlan.objects.get(id=plan_id, is_active=True)
+        except SubscriptionPlan.DoesNotExist:
+            messages.error(request, 'Seçilmiş paket tapılmadı!')
+            return redirect('subscription:plans')
+    
+    if not plan:
+        messages.info(request, 'Zəhmət olmasa əvvəlcə paket seçin.')
+        return redirect('subscription:plans')
     
     context = {
-        'plans': plans,
+        'plan': plan,
+        'plan_id': plan.id,
     }
     return render(request, 'subscription/register.html', context)
 
@@ -176,8 +183,12 @@ def contract_view(request):
     )
     
     if contract.agreed:
-        # Already agreed, redirect to admin
-        return redirect('subscription:success')
+        # Already agreed, activate subscription and redirect to dashboard
+        subscription = company.active_subscription
+        if subscription and subscription.status == 'pending':
+            subscription.status = 'active'
+            subscription.save()
+        return redirect('core:dashboard')
     
     if request.method == 'POST':
         agreed = request.POST.get('agreed') == 'on'
@@ -188,10 +199,16 @@ def contract_view(request):
             contract.ip_address = get_client_ip(request)
             contract.save()
             
-            messages.success(request, 'Contract accepted successfully!')
-            return redirect('subscription:success')
+            # Activate subscription
+            subscription = company.active_subscription
+            if subscription and subscription.status == 'pending':
+                subscription.status = 'active'
+                subscription.save()
+            
+            messages.success(request, 'Müqavilə təsdiqləndi! Xoş gəlmisiniz!')
+            return redirect('core:dashboard')
         else:
-            messages.error(request, 'You must agree to the contract to continue.')
+            messages.error(request, 'Müqaviləni qəbul etməlisiniz.')
     
     context = {
         'contract': contract,

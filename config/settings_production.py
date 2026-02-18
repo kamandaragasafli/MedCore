@@ -34,7 +34,9 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 
-# Database - PostgreSQL for production
+# Database - PostgreSQL for production (localda SQLite üçün əsas settings.py istifadə olunur)
+USE_POSTGRESQL = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

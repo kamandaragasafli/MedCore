@@ -46,6 +46,10 @@
                 <i class="fas fa-shield-alt"></i>
                 <span>Təhlükəsizlik</span>
             </a>
+            <a href="#backup" class="settings-nav-item" data-tab="backup">
+                <i class="fas fa-database"></i>
+                <span>Backup</span>
+            </a>
             <a href="#about" class="settings-nav-item" data-tab="about">
                 <i class="fas fa-info-circle"></i>
                 <span>Haqqında</span>
@@ -711,6 +715,125 @@
             </div>
         </div>
 
+        <!-- Backup Section -->
+        <div class="settings-panel" id="backup">
+            <div class="panel-header">
+                <h2><i class="fas fa-database"></i> Backup</h2>
+                <p>Verilənlər bazasının backup-ını idarə edin</p>
+            </div>
+
+            <div class="panel">
+                <div class="settings-section">
+                    <h3>Avtomatik Backup Parametrləri</h3>
+                    <form method="post" action="{% url 'core:backup_settings' %}" class="settings-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="backup_interval">Backup Vaxt Aralığı *</label>
+                            <select id="backup_interval" name="backup_interval" class="form-control" required>
+                                <option value="disabled" {% if not backup_settings or backup_settings.interval == 'disabled' %}selected{% endif %}>Deaktiv</option>
+                                <option value="daily" {% if backup_settings and backup_settings.interval == 'daily' %}selected{% endif %}>Günlük</option>
+                                <option value="weekly" {% if backup_settings and backup_settings.interval == 'weekly' %}selected{% endif %}>Həftəlik</option>
+                                <option value="monthly" {% if backup_settings and backup_settings.interval == 'monthly' %}selected{% endif %}>Aylıq</option>
+                            </select>
+                            <small style="color: var(--text-muted); margin-top: 4px; display: block;">
+                                Backup-ın nə qədər tez-tez yaradılacağını seçin
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="backup_retention">Backup Saxlama Müddəti (gün)</label>
+                            <input type="number" id="backup_retention" name="backup_retention" 
+                                   value="{% if backup_settings %}{{ backup_settings.retention_days }}{% else %}30{% endif %}" 
+                                   class="form-control" min="1" max="365">
+                            <small style="color: var(--text-muted); margin-top: 4px; display: block;">
+                                Köhnə backup-lar neçə gün saxlanacaq (1-365)
+                            </small>
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            <i class="fas fa-save"></i> Parametrləri Yadda Saxla
+                        </button>
+                    </form>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-section">
+                    <h3>Manual Backup</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 16px;">
+                        Verilənlər bazasının dərhal backup-ını yaradın
+                    </p>
+                    <form method="post" action="{% url 'core:create_backup' %}" class="settings-form" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="primary-btn">
+                            <i class="fas fa-download"></i> Backup Yarat
+                        </button>
+                    </form>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-section">
+                    <h3>Backup Tarixçəsi</h3>
+                    <div class="backup-list">
+                        {% if backups %}
+                            <table class="data-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Tarix</th>
+                                        <th>Ölçü</th>
+                                        <th>Status</th>
+                                        <th>Əməliyyatlar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for backup in backups %}
+                                    <tr>
+                                        <td>{{ backup.created_at|date:"d.m.Y H:i" }}</td>
+                                        <td>{{ backup.file_size|filesizeformat }}</td>
+                                        <td>
+                                            <span class="badge {% if backup.status == 'success' %}badge-success{% else %}badge-danger{% endif %}">
+                                                {{ backup.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="table-actions">
+                                                {% if backup.status == 'success' %}
+                                                <a href="{% url 'core:download_backup' backup.id %}" class="action-btn view-btn" title="Yüklə">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                                <form method="post" action="{% url 'core:delete_backup' backup.id %}" style="display: inline;" onsubmit="return confirm('Backup silinsin?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="action-btn delete-btn" title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px;">
+                                <i class="fas fa-database" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px; display: block;"></i>
+                                Hələ ki backup yoxdur
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if backup_settings and backup_settings.last_backup %}
+                <div class="settings-divider"></div>
+                <div class="info-row" style="padding: 16px; background: var(--surface-muted); border-radius: 8px;">
+                    <span class="info-label">Son Backup:</span>
+                    <span class="info-value">{{ backup_settings.last_backup|date:"d.m.Y H:i" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
         <!-- About Section -->
         <div class="settings-panel" id="about">
             <div class="panel-header">
@@ -847,6 +970,7 @@
 
                 <div class="copyright">
                     <p>&copy; 2025 MedAdmin. Bütün hüquqlar qorunur.</p>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">developer: kamandar</p>
                     <p class="copyright-links">
                         <a href="#">Xidmət Şərtləri</a> • 
                         <a href="#">Məxfilik Siyasəti</a> • 

@@ -5,6 +5,7 @@ __pycache__/
 *.so
 .Python
 env/
+.env.example
 venv/
 ENV/
 build/
@@ -30,6 +31,8 @@ db.sqlite3
 db.sqlite3-journal
 /media
 /staticfiles
+backups/
+*.sql
 
 # Environment variables
 .env

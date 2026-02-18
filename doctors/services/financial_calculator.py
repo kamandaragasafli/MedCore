@@ -17,11 +17,13 @@ DEGREE_FACTORS = {
 }
 
 
-def recalculate_doctor_financials(doctor_ids=None, region_ids=None):
+def recalculate_doctor_financials(doctor_ids=None, region_ids=None, month=None, year=None):
     """
-    Recalculate doctor financial metrics.
+    Recalculate doctor financial metrics for a specific month/year.
     doctor_ids: list of doctor IDs that must be recalculated
     region_ids: list of region IDs whose doctors need recalculation (e.g. after sales change)
+    month: filter prescriptions/sales by this month (1-12). If None, uses all data.
+    year: filter prescriptions/sales by this year. If None, uses all data.
     """
     doctor_ids = set(doctor_ids or [])
 
@@ -70,6 +72,12 @@ def recalculate_doctor_financials(doctor_ids=None, region_ids=None):
         .filter(prescription_filter)
         .select_related('prescription__doctor', 'prescription__region', 'drug')
     )
+    
+    # Ay və il filtri (tets.txt kimi)
+    if month:
+        prescription_items = prescription_items.filter(prescription__date__month=month)
+    if year:
+        prescription_items = prescription_items.filter(prescription__date__year=year)
 
     for item in prescription_items:
         doctor = item.prescription.doctor
@@ -96,6 +104,13 @@ def recalculate_doctor_financials(doctor_ids=None, region_ids=None):
             .filter(sale__region_id__in=region_ids)
             .select_related('sale__region', 'drug')
         )
+        
+        # Ay və il filtri (satış tarixi üzrə)
+        if month:
+            sale_items = sale_items.filter(sale__date__month=month)
+        if year:
+            sale_items = sale_items.filter(sale__date__year=year)
+        
         for sale_item in sale_items:
             region_sales[(sale_item.sale.region_id, sale_item.drug_id)] += Decimal(sale_item.quantity)
 

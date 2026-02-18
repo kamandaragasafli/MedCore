@@ -232,9 +232,8 @@
         applyTheme(themes[currentTheme]);
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        loadSavedTheme();
-    });
+    // Theme is already applied by inline script in head, so we don't need to load it again on DOMContentLoaded
+    // This prevents the flash of light mode. The function is kept for manual theme switching.
 
     window.themeManager = {
         themes,

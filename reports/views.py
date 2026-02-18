@@ -117,12 +117,16 @@ def prepare_reports_data(request):
     year_int = safe_int(filters["year"], today.year)
 
     # -----------------------------
+    # REGION REQUIRED - If no region selected, return empty data
+    # -----------------------------
+    if not filters["region"]:
+        drugs = Drug.objects.filter(is_active=True).order_by("ad")
+        return filters, [], drugs
+
+    # -----------------------------
     # LOAD DOCTORS (all doctors in region filter)
     # -----------------------------
-    doctors = Doctor.objects.select_related("region", "ixtisas").all()
-
-    if filters["region"]:
-        doctors = doctors.filter(region_id=filters["region"])
+    doctors = Doctor.objects.select_related("region", "ixtisas").filter(region_id=filters["region"])
 
     if filters["doctor"]:
         doctors = doctors.filter(
@@ -138,13 +142,10 @@ def prepare_reports_data(request):
     snapshot_mode = False
     snapshot_qs = MonthlyDoctorReport.objects.none()
 
-    if month_int and year_int:
+    if month_int and year_int and filters["region"]:
         snapshot_qs = MonthlyDoctorReport.objects.select_related(
             "doctor", "doctor__region", "doctor__ixtisas"
-        ).filter(year=year_int, month=month_int)
-
-        if filters["region"]:
-            snapshot_qs = snapshot_qs.filter(region_id=filters["region"])
+        ).filter(year=year_int, month=month_int, region_id=filters["region"])
 
         if filters["doctor"]:
             snapshot_qs = snapshot_qs.filter(
@@ -368,9 +369,14 @@ def close_month_report(request):
     today = date.today()
     month = safe_int(request.GET.get("month"), today.month)
     year = safe_int(request.GET.get("year"), today.year)
+    region = (request.GET.get("region") or "").strip()
 
     if not month or not year:
         messages.error(request, "Month and year are required to close report.")
+        return redirect("reports:list")
+    
+    if not region:
+        messages.error(request, "Bölgə seçilməlidir.")
         return redirect("reports:list")
 
     # Month cannot be closed twice

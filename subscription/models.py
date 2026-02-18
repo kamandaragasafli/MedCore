@@ -343,3 +343,98 @@ class NotificationTemplate(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class BackupSettings(models.Model):
+    """
+    Backup Settings Model - Company backup configuration
+    """
+    INTERVAL_CHOICES = [
+        ('disabled', 'Deaktiv'),
+        ('daily', 'Günlük'),
+        ('weekly', 'Həftəlik'),
+        ('monthly', 'Aylıq'),
+    ]
+    
+    company = models.OneToOneField(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='backup_settings',
+        verbose_name='Şirkət'
+    )
+    
+    interval = models.CharField(
+        max_length=20,
+        choices=INTERVAL_CHOICES,
+        default='disabled',
+        verbose_name='Backup Aralığı'
+    )
+    
+    retention_days = models.IntegerField(
+        default=30,
+        verbose_name='Saxlama Müddəti (gün)',
+        help_text='Köhnə backup-lar neçə gün saxlanacaq'
+    )
+    
+    last_backup = models.DateTimeField(null=True, blank=True, verbose_name='Son Backup')
+    next_backup = models.DateTimeField(null=True, blank=True, verbose_name='Növbəti Backup')
+    
+    is_active = models.BooleanField(default=True, verbose_name='Aktiv')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Backup Parametrləri'
+        verbose_name_plural = 'Backup Parametrləri'
+    
+    def __str__(self):
+        return f"{self.company.name} - {self.get_interval_display()}"
+
+
+class Backup(models.Model):
+    """
+    Backup Model - Stores backup file information
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Gözləyir'),
+        ('success', 'Uğurlu'),
+        ('failed', 'Uğursuz'),
+    ]
+    
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='backups',
+        verbose_name='Şirkət'
+    )
+    
+    file_path = models.CharField(max_length=500, verbose_name='Fayl Yolu')
+    file_name = models.CharField(max_length=200, verbose_name='Fayl Adı')
+    file_size = models.BigIntegerField(default=0, verbose_name='Fayl Ölçüsü (bytes)')
+    
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Status'
+    )
+    
+    error_message = models.TextField(blank=True, null=True, verbose_name='Xəta Mesajı')
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yaradılma Tarixi')
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_backups',
+        verbose_name='Yaradan'
+    )
+    
+    class Meta:
+        verbose_name = 'Backup'
+        verbose_name_plural = 'Backup-lar'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.company.name} - {self.file_name} - {self.created_at.strftime('%d.%m.%Y %H:%M')}"
