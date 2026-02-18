@@ -64,14 +64,18 @@ def subscription_required(view_func):
             messages.warning(request, 'No active subscription. Please subscribe to continue.')
             return redirect('subscription:plans')
         
-        # If pending, check if contract is agreed
+        # If pending, check if contract is agreed and activate subscription
         if subscription.status == 'pending':
             try:
                 contract = ContractAgreement.objects.get(
                     company=request.company,
                     user=request.user
                 )
-                if not contract.agreed:
+                if contract.agreed:
+                    # Contract agreed, activate subscription
+                    subscription.status = 'active'
+                    subscription.save()
+                else:
                     # Contract not agreed yet, redirect to contract
                     return redirect('subscription:contract')
             except ContractAgreement.DoesNotExist:
