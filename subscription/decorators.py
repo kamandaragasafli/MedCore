@@ -14,20 +14,24 @@ def contract_required(view_func):
             return redirect('core:login')
         
         # Skip contract check for contract view itself and subscription pages
-        if request.path.startswith('/subscription/contract') or request.path.startswith('/subscription/plans'):
+        if (request.path.startswith('/subscription/contract') or 
+            request.path.startswith('/subscription/plans') or
+            request.path.startswith('/subscription/register')):
             return view_func(request, *args, **kwargs)
         
         try:
             user_profile = request.user.profile
             company = user_profile.company
             
-            # Check if contract is agreed
+            # Check if contract is agreed (refresh from DB to get latest value)
             try:
                 contract = ContractAgreement.objects.get(company=company, user=request.user)
                 if not contract.agreed:
+                    messages.info(request, 'Xidmət şərtləri ilə razılaşmalısınız.')
                     return redirect('subscription:contract')
             except ContractAgreement.DoesNotExist:
                 # Contract not created yet, redirect to contract
+                messages.info(request, 'Xidmət şərtləri ilə razılaşmalısınız.')
                 return redirect('subscription:contract')
         except:
             # Profile doesn't exist, allow through (will be caught by subscription_required)
@@ -51,11 +55,28 @@ def subscription_required(view_func):
             messages.error(request, 'No company associated with your account. Please contact support.')
             return redirect('subscription:plans')
         
-        subscription = request.company.active_subscription
+        # Get subscription (including pending ones)
+        subscription = request.company.subscriptions.filter(
+            status__in=['active', 'pending']
+        ).order_by('-created_at').first()
         
         if not subscription:
             messages.warning(request, 'No active subscription. Please subscribe to continue.')
             return redirect('subscription:plans')
+        
+        # If pending, check if contract is agreed
+        if subscription.status == 'pending':
+            try:
+                contract = ContractAgreement.objects.get(
+                    company=request.company,
+                    user=request.user
+                )
+                if not contract.agreed:
+                    # Contract not agreed yet, redirect to contract
+                    return redirect('subscription:contract')
+            except ContractAgreement.DoesNotExist:
+                # Contract not created yet, redirect to contract
+                return redirect('subscription:contract')
         
         # Removed trial check since we're requiring payment now
         if subscription.status == 'expired':
